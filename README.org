@@ -1,7 +1,96 @@
-* Space Game
+* SPACE GAME
 Projeto final de Computação Gráfica, Cefet-Petrópolis 2026.
 
-* Regras do Repositório
+** Grupo 1
+Premissa:
+- Nave
+- Controle
+- Física.
+
+Integrantes:
+- faltando :: Gabriel.
+- faltando :: Igor.
+- faltando :: Rafael.
+
+Responsabilidades:
+- Movimento com inércia.
+- Rotação da nave.
+- Controle por teclado.
+- Sistema hierárquico (ex: braço mecânico)
+- Cone de visão.
+
+Interfaces Principais:
+#+BEGIN_SRC C
+/* declarado em ``utils.h'', métodos implementados em ``utils.c'' */
+typedef struct Vec3 {
+    float x;
+    float y;
+    float z;
+} Vec3;
+
+/* declarados em ``ship.h'', implementados em ``ship.c'' */
+Vec3 getShipPosition(void);
+Vec3 getShipForward(void);
+void updateShip(float dt);
+#+END_SRC
+
+** Grupo 2
+Premissa:
+- Ambiente.
+- Asteroides.
+
+Integrantes:
+- @Faint-Black :: Gustavo
+- @pedro-hfw :: Pedro
+- faltando :: Lucas
+
+Responsabilidades:
+- Geração procedural de asteroides.
+- Armazenamento de vértices.
+- Implementação de AABB para cada asteróide.
+- Renderização e movimentação dos asteróides.
+
+Interfaces Principais:
+#+BEGIN_SRC C
+/* declarado em ``asteroid.h'' */
+typedef struct Asteroid {
+    Vec3* points;
+    int point_count;
+} Asteroid;
+
+/* declarados em ``asteroid.h'', implementados em ``asteroid.c'' */
+Asteroid* getAsteroids(void);
+int getAsteroidCount(void);
+#+END_SRC
+
+** Grupo 3
+Premissa:
+- Colisão.
+- HUD.
+- Gameplay.
+
+Integrantes:
+- faltando :: Milena
+- faltando :: Vitor
+- faltando :: João
+- @Maique1915 :: Maique
+
+Responsabilidades:
+- Detecção de colisões.
+- Sistema de pontuação.
+- Interface gráfica (HUD).
+- Estados do jogo.
+
+Interfaces Principais:
+#+BEGIN_SRC C
+/* declarado em ``collision.h'', implementado em ``collision.c'' */
+int checkCollision(Vec3 ship_pos);
+
+/* declarado em ``hud.h'', implementado em ``hud.c'' */
+void renderHUD(int score, int lives);
+#+END_SRC
+
+* REGRAS DO REPOSITÓRIO
 Consensos para o trabalho em grupo.
 
 ** Arquivos Reservados
@@ -18,7 +107,7 @@ Proibido alterar qualquer um dos seguintes arquivos:
 2. É imperativo que todo commit passe pelo processo de compilação sem erros,
    antes de ser empurrado para o remoto.
 
-* Construção
+* CONSTRUÇÃO
 Processo de compilação do projeto.
 
 ** Pré-Requisitos
