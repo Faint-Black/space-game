@@ -1,2 +1,5 @@
 space-game
 *.o
+TAGS
+.vscode
+compile_commands.json
