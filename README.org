@@ -1,0 +1,37 @@
+* Space Game
+Projeto final de Computação Gráfica, Cefet-Petrópolis 2026.
+
+* Regras do Repositório
+Consensos para o trabalho em grupo.
+
+** Arquivos Reservados
+Proibido alterar qualquer um dos seguintes arquivos:
+- =README.org=
+- =Makefile=
+- =.clangd=
+- =.clang-format=
+- =.clang-tidy=
+- =.gitignore=
+
+** Programação
+1. Tudo deve ser escrito em inglês, até comentários.
+2. É imperativo que todo commit passe pelo processo de compilação sem erros,
+   antes de ser empurrado para o remoto.
+
+* Construção
+Processo de compilação do projeto.
+
+** Pré-Requisitos
+#+BEGIN_SRC shell
+sudo apt install libopengl-dev libglew-dev libglut-dev
+#+END_SRC
+
+** Compilação
+#+BEGIN_SRC shell
+make -j4
+#+END_SRC
+
+** Execução
+#+BEGIN_SRC shell
+./space-game
+#+END_SRC
