@@ -1,23 +1,17 @@
 #include "ship.h"
 #include "utils.h"
 
-/* Global ship state */
-static struct {
-    Vec3 position;
-    Vec3 velocity;
-    Vec3 acceleration;
-    Vec3 forward;
-} global_ship;
+Ship globalShip;
 
-extern Vec3 getShipPosition(void) {
-    return global_ship.position;
+extern Vec3 getShipPosition() {
+    return globalShip.position;
 }
 
-extern Vec3 getShipForward(void) {
-    return global_ship.forward;
+extern Vec3 getShipForward() {
+    return globalShip.forward;
 }
 
 /* TODO */
 extern void updateShip(float dt) {
-    (void)dt;
+    // ship->;
 }

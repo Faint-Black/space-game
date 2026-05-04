@@ -3,6 +3,30 @@
 
 #include "utils.h"
 
+
+typedef struct {
+    float angle;
+    float clawAngle;
+    int extended;
+} Arm;
+
+typedef struct {
+    Vec3 position;
+    Vec3 velocity;
+    Vec3 acceleration;
+    Vec3 angularVelocity;
+
+    Vec3 up;
+    Vec3 right;
+    Vec3 forward;
+
+    float pitch;
+    float yaw;
+    float row;
+
+    Arm arm;
+} Ship;
+
 /**
  * @brief Fetches from global-state the world position of the ship entity.
  *
