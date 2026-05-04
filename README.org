@@ -8,9 +8,9 @@ Premissa:
 - Física.
 
 Integrantes:
-- faltando :: Gabriel.
-- faltando :: Igor.
-- faltando :: Rafael.
+- @gddeazevedo :: Gabriel.
+- @igorgiamattey :: Igor.
+- @rafacdomin :: Rafael.
 
 Responsabilidades:
 - Movimento com inércia.
@@ -71,7 +71,7 @@ Premissa:
 
 Integrantes:
 - faltando :: Milena
-- faltando :: Vitor
+- @Vitor5252 :: Vitor
 - faltando :: João
 - @Maique1915 :: Maique
 
@@ -104,23 +104,37 @@ Proibido alterar qualquer um dos seguintes arquivos:
 
 ** Programação
 1. Tudo deve ser escrito em inglês, até comentários.
-2. É imperativo que todo commit passe pelo processo de compilação sem erros,
+2. É imperativo que todo commit passe pelo processo de verificação sem erros,
    antes de ser empurrado para o remoto.
 
 * CONSTRUÇÃO
 Processo de compilação do projeto.
 
 ** Pré-Requisitos
+*OpenGL* pode ser instalado normalmente por qualquer package manager.
 #+BEGIN_SRC shell
-sudo apt install libopengl-dev libglew-dev libglut-dev
+sudo apt install libopengl-dev
+#+END_SRC
+
+Porém *SDL3* deve ser instalado manualmente.
+vá para sua página no [[https://github.com/libsdl-org/SDL][github]] e clone o repositório, após disso compile e instale com Cmake:
+#+BEGIN_SRC shell
+cmake -S . -B build
+cmake --build build --parallel
+sudo cmake --install build
 #+END_SRC
 
 ** Compilação
 #+BEGIN_SRC shell
-make -j4
+make
+#+END_SRC
+
+** Verificação
+#+BEGIN_SRC shell
+make check
 #+END_SRC
 
 ** Execução
 #+BEGIN_SRC shell
-./space-game
+make run
 #+END_SRC

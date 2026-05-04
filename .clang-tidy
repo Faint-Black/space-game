@@ -8,6 +8,7 @@ Checks: >
   readability-*,
   llvm*,
 
+  -readability-magic-numbers,
   -modernize-macro-to-enum,
   -clang-diagnostic-unused-command-line-argument,
   -readability-braces-around-statements,
