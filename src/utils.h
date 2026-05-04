@@ -7,7 +7,10 @@ typedef struct Vec3 {
     float z;
 } Vec3;
 
-
+/**
+ * @brief Creates a new Vec3 struct with the given components.
+ * @return Vec3 struct with the given components.
+ */
 extern Vec3 vec3Create(float x, float y, float z);
 
 /**
