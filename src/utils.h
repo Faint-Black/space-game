@@ -7,6 +7,9 @@ typedef struct Vec3 {
     float z;
 } Vec3;
 
+
+extern Vec3 vec3Create(float x, float y, float z);
+
 /**
  * @brief Computes the sum of 2 vectors.
  *
@@ -15,10 +18,10 @@ typedef struct Vec3 {
 extern Vec3 vec3AddVector(Vec3 a, Vec3 b);
 
 /**
- * @brief Sums all vector components with a scalar.
+ * @brief Multiplies all vector components by a scalar.
  *
- * @return Vector + Scalar sum.
+ * @return Vector * Scalar sum.
  */
-extern Vec3 vec3AddScalar(Vec3 vec, float scalar);
+extern Vec3 vec3Scale(Vec3 vec, float scalar);
 
 #endif /* UTILS_H */

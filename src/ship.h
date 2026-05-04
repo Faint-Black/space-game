@@ -3,26 +3,40 @@
 
 #include "utils.h"
 
-
 typedef struct {
     float angle;
     float clawAngle;
-    int extended;
+    int   extended;
 } Arm;
 
 typedef struct {
+    // Posicao e orientacao
     Vec3 position;
     Vec3 velocity;
     Vec3 acceleration;
     Vec3 angularVelocity;
 
+    // Eixos locais da nave (forward = -Z, up = Y, right = X)
+    Vec3 forward;
     Vec3 up;
     Vec3 right;
-    Vec3 forward;
 
+    // Rotacaoo em torno dos eixos locais
     float pitch;
     float yaw;
-    float row;
+    float roll;
+
+    // Fisica e controle
+    float thrustPower;
+    float rotationSpeed;
+    float dampingLinear;
+    float dampingAngular;
+
+    // Scanner
+    float scannerAngle;
+    float scannerRange;
+
+    int thrusting;
 
     Arm arm;
 } Ship;
@@ -32,14 +46,14 @@ typedef struct {
  *
  * @return Ship's position.
  */
-extern Vec3 getShipPosition(void);
+extern Vec3 getShipPosition();
 
 /**
  * @brief Fetches from global-state the direction unit vector of the ship entity.
  *
  * @return Ship's direction vector.
  */
-extern Vec3 getShipForward(void);
+extern Vec3 getShipForward();
 
 /**
  * @brief Advances the ship's state for 1 frame.

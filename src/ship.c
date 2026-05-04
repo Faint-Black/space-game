@@ -13,5 +13,5 @@ extern Vec3 getShipForward() {
 
 /* TODO */
 extern void updateShip(float dt) {
-    // ship->;
+    
 }
