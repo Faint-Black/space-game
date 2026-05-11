@@ -8,9 +8,9 @@ Premissa:
 - Física.
 
 Integrantes:
-- @gddeazevedo :: Gabriel.
-- @igorgiamattey :: Igor.
-- @rafacdomin :: Rafael.
+- @gddeazevedo (Gabriel).
+- @igorgiamattey (Igor).
+- @rafacdomin (Rafael).
 
 Responsabilidades:
 - Movimento com inércia.
@@ -40,9 +40,10 @@ Premissa:
 - Asteroides.
 
 Integrantes:
-- @Faint-Black :: Gustavo
-- @pedro-hfw :: Pedro
-- faltando :: Lucas
+- @Faint-Black (Gustavo).
+- @pedro-hfw (Pedro).
+- @lb-rand (Lucas).
+- faltando (Brenno).
 
 Responsabilidades:
 - Geração procedural de asteroides.
@@ -70,10 +71,10 @@ Premissa:
 - Gameplay.
 
 Integrantes:
-- faltando :: Milena
-- @Vitor5252 :: Vitor
-- faltando :: João
-- @Maique1915 :: Maique
+- @MilenaC (Milena).
+- @Vitor5252 (Vitor).
+- @joaosao1000 (João).
+- @Maique1915 (Maique).
 
 Responsabilidades:
 - Detecção de colisões.
@@ -111,22 +112,14 @@ Proibido alterar qualquer um dos seguintes arquivos:
 Processo de compilação do projeto.
 
 ** Pré-Requisitos
-*OpenGL* pode ser instalado normalmente por qualquer package manager.
+*OpenGL* e *SDL2* podem ser instalados normalmente por qualquer package manager.
 #+BEGIN_SRC shell
-sudo apt install libopengl-dev
-#+END_SRC
-
-Porém *SDL3* deve ser instalado manualmente.
-vá para sua página no [[https://github.com/libsdl-org/SDL][github]] e clone o repositório, após disso compile e instale com Cmake:
-#+BEGIN_SRC shell
-cmake -S . -B build
-cmake --build build --parallel
-sudo cmake --install build
+sudo apt install libopengl-dev libsdl2-dev
 #+END_SRC
 
 ** Compilação
 #+BEGIN_SRC shell
-make
+make -j4
 #+END_SRC
 
 ** Verificação
@@ -136,5 +129,5 @@ make check
 
 ** Execução
 #+BEGIN_SRC shell
-make run
+make run -j4
 #+END_SRC

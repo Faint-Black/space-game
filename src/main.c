@@ -1,7 +1,9 @@
 #include <GL/gl.h>
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_video.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_error.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_log.h>
+#include <SDL2/SDL_video.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -13,25 +15,29 @@ int main(void) {
     SDL_Event sdl_event;
     SDL_GLContext gl_context;
     bool running = true;
+    const int window_flags = (SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "ERROR: failed 'SDL_Init' with error '%s'", SDL_GetError());
         return -1;
     }
 
-    /* OpenGL 2.1 */
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    /* OpenGL 1.1 (fixed function pipeline only) */
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-    sdl_window = SDL_CreateWindow("Space Game", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-    if (sdl_window == NULL) return -1;
+    sdl_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, window_flags);
+    if (sdl_window == NULL) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "ERROR: failed 'SDL_CreateWindow' with error '%s'", SDL_GetError());
+        SDL_Quit();
+        return -1;
+    }
 
     gl_context = SDL_GL_CreateContext(sdl_window);
 
     while (running) {
         while (SDL_PollEvent(&sdl_event)) {
-            if (sdl_event.type == SDL_EVENT_QUIT) {
-                running = false;
-            }
+            if (sdl_event.type == SDL_QUIT) running = false;
         }
 
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -52,10 +58,12 @@ int main(void) {
         }
         glEnd();
 
+        /* swap front and back buffers */
         SDL_GL_SwapWindow(sdl_window);
     }
 
-    SDL_GL_DestroyContext(gl_context);
+    /* cleanup */
+    SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
 
