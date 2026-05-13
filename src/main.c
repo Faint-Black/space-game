@@ -7,12 +7,19 @@
 #include <SDL2/SDL_video.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
+/* global variables */
+static SDL_Window* global_sdl_window;
+static SDL_GLContext global_gl_context;
+static bool global_app_should_run = true;
+static long global_tick_counter = 0;
+
 /* returns 0 on success, -1 on failure */
-static int initializeSDLandOpenGL(SDL_Window** sdl_window, SDL_GLContext* gl_context) {
+static int initializeSDLandOpenGL(void) {
     const int window_flags = (SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -24,67 +31,79 @@ static int initializeSDLandOpenGL(SDL_Window** sdl_window, SDL_GLContext* gl_con
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-    *sdl_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, window_flags);
-    if (sdl_window == NULL) {
+    global_sdl_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, window_flags);
+    if (global_sdl_window == NULL) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "ERROR: failed 'SDL_CreateWindow' with error '%s'", SDL_GetError());
         SDL_Quit();
         return -1;
     }
 
-    *gl_context = SDL_GL_CreateContext(*sdl_window);
+    global_gl_context = SDL_GL_CreateContext(global_sdl_window);
 
     return 0;
 }
 
-static void deinitializeSDLandOpenGL(SDL_Window** sdl_window, SDL_GLContext* gl_context) {
-    SDL_GL_DeleteContext(*gl_context);
-    SDL_DestroyWindow(*sdl_window);
+static void deinitializeSDLandOpenGL(void) {
+    SDL_GL_DeleteContext(global_gl_context);
+    SDL_DestroyWindow(global_sdl_window);
     SDL_Quit();
 }
 
-int main(void) {
-    SDL_Window* sdl_window;
-    SDL_Event sdl_event;
-    SDL_GLContext gl_context;
-    bool running = true;
+static void gameInit(void) {
+    if (initializeSDLandOpenGL() != 0) exit(EXIT_FAILURE);
 
-    if (initializeSDLandOpenGL(&sdl_window, &gl_context) != 0) {
-        return -1;
-    }
-
-    /* game init code here */
     initAsteroids(50);
+}
 
-    while (running) {
-        while (SDL_PollEvent(&sdl_event)) {
-            if (sdl_event.type == SDL_QUIT) running = false;
-        }
-
-        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        /* hello world triangle */
-        glBegin(GL_TRIANGLES);
-        {
-            glColor3f(1.0F, 0.0F, 0.0F);
-            glVertex2f(-0.5F, -0.5F);
-
-            glColor3f(0.0F, 1.0F, 0.0F);
-            glVertex2f(0.5F, -0.5F);
-
-            glColor3f(0.0F, 0.0F, 1.0F);
-            glVertex2f(0.0F, 0.5F);
-        }
-        glEnd();
-
-        /* swap front and back buffers */
-        SDL_GL_SwapWindow(sdl_window);
-    }
-
-    /* game deinit code here */
+static void gameDeinit(void) {
     deinitAsteroids();
 
-    deinitializeSDLandOpenGL(&sdl_window, &gl_context);
+    deinitializeSDLandOpenGL();
+}
+
+static void gamePollEvents(void) {
+    SDL_Event sdl_event;
+    while (SDL_PollEvent(&sdl_event)) {
+        if (sdl_event.type == SDL_QUIT) global_app_should_run = false;
+    }
+}
+
+static void gameUpdate(void) {
+    global_tick_counter += 1;
+}
+
+static void gameRenderFrame(void) {
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    /* hello world triangle */
+    glBegin(GL_TRIANGLES);
+    {
+        glColor3f(1.0F, 0.0F, 0.0F);
+        glVertex2f(-0.5F, -0.5F);
+
+        glColor3f(0.0F, 1.0F, 0.0F);
+        glVertex2f(0.5F, -0.5F);
+
+        glColor3f(0.0F, 0.0F, 1.0F);
+        glVertex2f(0.0F, 0.5F);
+    }
+    glEnd();
+
+    /* swap front and back buffers */
+    SDL_GL_SwapWindow(global_sdl_window);
+}
+
+int main(void) {
+    gameInit();
+
+    while (global_app_should_run) {
+        gamePollEvents();
+        gameUpdate();
+        gameRenderFrame();
+    }
+
+    gameDeinit();
     return 0;
 }
