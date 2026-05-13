@@ -8,13 +8,14 @@ static int asteroid_count = 0;
 
 /* frees individual asteroid allocated data */
 static void deinitAsteroid(Asteroid asteroid) {
-    if (asteroid.points != NULL) {
-        free(asteroid.points);
+    if (asteroid.faces != NULL) {
+        free(asteroid.faces);
     }
 }
 
 extern void initAsteroids(int max_asteroid_count) {
     asteroid_count = max_asteroid_count;
+    asteroid_array = NULL; /* TODO */
 }
 
 extern void deinitAsteroids(void) {

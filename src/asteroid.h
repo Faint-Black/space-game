@@ -1,11 +1,11 @@
 #ifndef ASTEROID_H
 #define ASTEROID_H
 
-#include "utils.h"
+#include "render.h"
 
 typedef struct Asteroid {
-    Vec3* points;
-    int point_count;
+    TriangleFace* faces;
+    int face_count;
 } Asteroid;
 
 /**
