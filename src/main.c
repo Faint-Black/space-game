@@ -1,3 +1,4 @@
+#include "asteroid.h"
 #include <GL/gl.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
@@ -10,11 +11,8 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-int main(void) {
-    SDL_Window* sdl_window;
-    SDL_Event sdl_event;
-    SDL_GLContext gl_context;
-    bool running = true;
+/* returns 0 on success, -1 on failure */
+static int initializeSDLandOpenGL(SDL_Window** sdl_window, SDL_GLContext* gl_context) {
     const int window_flags = (SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -26,14 +24,36 @@ int main(void) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
-    sdl_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, window_flags);
+    *sdl_window = SDL_CreateWindow("Space Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, window_flags);
     if (sdl_window == NULL) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "ERROR: failed 'SDL_CreateWindow' with error '%s'", SDL_GetError());
         SDL_Quit();
         return -1;
     }
 
-    gl_context = SDL_GL_CreateContext(sdl_window);
+    *gl_context = SDL_GL_CreateContext(*sdl_window);
+
+    return 0;
+}
+
+static void deinitializeSDLandOpenGL(SDL_Window** sdl_window, SDL_GLContext* gl_context) {
+    SDL_GL_DeleteContext(*gl_context);
+    SDL_DestroyWindow(*sdl_window);
+    SDL_Quit();
+}
+
+int main(void) {
+    SDL_Window* sdl_window;
+    SDL_Event sdl_event;
+    SDL_GLContext gl_context;
+    bool running = true;
+
+    if (initializeSDLandOpenGL(&sdl_window, &gl_context) != 0) {
+        return -1;
+    }
+
+    /* game init code here */
+    initAsteroids(50);
 
     while (running) {
         while (SDL_PollEvent(&sdl_event)) {
@@ -62,10 +82,9 @@ int main(void) {
         SDL_GL_SwapWindow(sdl_window);
     }
 
-    /* cleanup */
-    SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(sdl_window);
-    SDL_Quit();
+    /* game deinit code here */
+    deinitAsteroids();
 
+    deinitializeSDLandOpenGL(&sdl_window, &gl_context);
     return 0;
 }

@@ -9,11 +9,21 @@ typedef struct Asteroid {
 } Asteroid;
 
 /**
- * @brief Fetches from global-state the reference to the asteroid entity array.
+ * @brief Initializes internal state of asteroids. Must be called once before game begins.
+ */
+extern void initAsteroids(int max_asteroid_count);
+
+/**
+ * @brief Deinitializes internal state of asteroids. Must be called after game is finished.
+ */
+extern void deinitAsteroids(void);
+
+/**
+ * @brief Fetches from global-state the constant reference to the asteroid entity array.
  *
  * @return Asteroid array.
  */
-extern Asteroid* getAsteroids(void);
+extern const Asteroid* getAsteroids(void);
 
 /**
  * @brief Fetches from global-state the length of the asteroid entity array.
