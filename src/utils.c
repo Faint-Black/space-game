@@ -116,3 +116,36 @@ extern float vec3Distance(Vec3 a, Vec3 b) {
     const Vec3 delta = vec3SubVector(b, a);
     return vec3Magnitude(delta);
 }
+
+extern Vec3 vec3BarycenterPolygon(const Vec3* vectors, int count) {
+    int i;
+    Vec3 accumulator = vec3Null();
+    for (i = 0; i < count; i++) {
+        accumulator = vec3AddVector(accumulator, vectors[i]);
+    }
+    return vec3DivScalar(accumulator, (float)count);
+}
+
+extern Vec3 vec3BarycenterLine(Vec3 v1, Vec3 v2) {
+    Vec3 vectors[2];
+    vectors[0] = v1;
+    vectors[1] = v2;
+    return vec3BarycenterPolygon(vectors, 2);
+}
+
+extern Vec3 vec3BarycenterTri(Vec3 v1, Vec3 v2, Vec3 v3) {
+    Vec3 vectors[3];
+    vectors[0] = v1;
+    vectors[1] = v2;
+    vectors[2] = v3;
+    return vec3BarycenterPolygon(vectors, 3);
+}
+
+extern Vec3 vec3BarycenterQuad(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4) {
+    Vec3 vectors[4];
+    vectors[0] = v1;
+    vectors[1] = v2;
+    vectors[2] = v3;
+    vectors[3] = v4;
+    return vec3BarycenterPolygon(vectors, 4);
+}

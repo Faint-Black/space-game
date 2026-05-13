@@ -119,4 +119,35 @@ extern Vec3 vec3Normalize(Vec3 vec);
  */
 extern float vec3Distance(Vec3 a, Vec3 b);
 
+/**
+ * @brief Calculates the barycenter of the input vectors.
+ *
+ * @param vectors The vector array.
+ * @param count The length of the vector array.
+ *
+ * @return Vector(average(vectors.x), average(vectors.y), average(vectors.z))
+ */
+extern Vec3 vec3BarycenterPolygon(const Vec3* vectors, int count);
+
+/**
+ * @brief Convenience wrapper of vec3BarycenterPolygon() for 2 vectors.
+ *
+ * @return barycenter([v1, v2])
+ */
+extern Vec3 vec3BarycenterLine(Vec3 v1, Vec3 v2);
+
+/**
+ * @brief Convenience wrapper of vec3BarycenterPolygon() for 3 vectors.
+ *
+ * @return barycenter([v1, v2, v3])
+ */
+extern Vec3 vec3BarycenterTri(Vec3 v1, Vec3 v2, Vec3 v3);
+
+/**
+ * @brief Convenience wrapper of vec3BarycenterPolygon() for 4 vectors.
+ *
+ * @return barycenter([v1, v2, v3, v4])
+ */
+extern Vec3 vec3BarycenterQuad(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4);
+
 #endif /* UTILS_H */
