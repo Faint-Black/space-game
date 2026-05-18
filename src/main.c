@@ -1,5 +1,6 @@
 #include "asteroid.h"
 #include "ship.h"
+#include "utils.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
@@ -8,12 +9,55 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_log.h>
 #include <SDL2/SDL_video.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+
+/* ---- Star field ---- */
+#define NUM_STARS 800
+static Vec3 starPositions[NUM_STARS];
+static float starBrightness[NUM_STARS];
+
+static float randf(void) {
+    return (float)rand() / (float)RAND_MAX;
+}
+
+static float randfRange(float lo, float hi) {
+    return lo + randf() * (hi - lo);
+}
+
+static void initStars(void) {
+    int i;
+    srand(42u);
+    for (i = 0; i < NUM_STARS; i++) {
+        Vec3 dir = vec3(randf() - 0.5F, randf() - 0.5F, randf() - 0.5F);
+        float mag = vec3Magnitude(dir);
+        if (mag < 0.001F) { dir = vec3(0.0F, 1.0F, 0.0F); mag = 1.0F; }
+        starPositions[i] = vec3MulScalar(vec3DivScalar(dir, mag), 500.0F);
+        starBrightness[i] = randfRange(0.3F, 1.0F);
+    }
+}
+
+static void renderStars(void) {
+    Vec3 shipPos = getShipPosition();
+    int i;
+    glDisable(GL_LIGHTING);
+    glPointSize(2.0F);
+    glBegin(GL_POINTS);
+    for (i = 0; i < NUM_STARS; i++) {
+        float b = starBrightness[i];
+        glColor3f(b, b, b * 0.95F);
+        glVertex3f(shipPos.x + starPositions[i].x,
+                   shipPos.y + starPositions[i].y,
+                   shipPos.z + starPositions[i].z);
+    }
+    glEnd();
+    glEnable(GL_LIGHTING);
+}
 
 /* global variables */
 static SDL_Window* global_sdl_window;
@@ -80,6 +124,7 @@ static void deinitializeSDLandOpenGL(void) {
 static void gameInit(void) {
     if (initializeSDLandOpenGL() != 0) exit(EXIT_FAILURE);
 
+    initStars();
     initShip();
     initAsteroids(50);
 
@@ -169,6 +214,9 @@ static void gameRenderFrame(void) {
 
     /* Scene lighting */
     setupLighting();
+
+    /* Stars (camera-relative background) */
+    renderStars();
 
     /* Render ship + projectiles */
     renderShip();

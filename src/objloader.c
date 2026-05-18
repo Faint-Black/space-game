@@ -194,11 +194,11 @@ extern OBJModel* loadOBJModel(const char* objPath) {
                 }
             }
         } else if (line[0] == 'v' && line[1] == 't' && line[2] == ' ') {
-            /* texture coordinate */
+            /* texture coordinate (flip V for OpenGL) */
             float u, v;
             if (sscanf(line + 3, "%f %f", &u, &v) >= 2) {
                 if (tcCount < MAX_TEXCOORDS) {
-                    texcoords[tcCount] = vec3(u, v, 0.0F);
+                    texcoords[tcCount] = vec3(u, 1.0F - v, 0.0F);
                     tcCount++;
                 }
             }
@@ -373,6 +373,7 @@ extern void renderOBJModel(const OBJModel* model) {
     int i;
     if (model == NULL) return;
 
+    glDisable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_2D);
     for (i = 0; i < model->materialCount; i++) {
         if (model->materials[i].faceCount == 0) continue;
@@ -386,4 +387,5 @@ extern void renderOBJModel(const OBJModel* model) {
         renderTriFaces(model->materials[i].faces, model->materials[i].faceCount);
     }
     glDisable(GL_TEXTURE_2D);
+    glEnable(GL_CULL_FACE);
 }
