@@ -129,7 +129,7 @@ extern void shipToggleScanner() {
 }
 
 extern void shipMouseMotion(int dx, int dy) {
-    float camSens = 0.005F;
+    float camSens = 0.001F;
 
     /* Rotate camera orbit */
     global_ship.cameraYaw -= (float)dx * camSens;
@@ -179,15 +179,15 @@ extern void updateShip(float dt) {
     if (keys[SDL_SCANCODE_S]) thrustInput -= 1.0F;
     if (keys[SDL_SCANCODE_A]) strafeInput -= 1.0F;
     if (keys[SDL_SCANCODE_D]) strafeInput += 1.0F;
-    if (keys[SDL_SCANCODE_Q]) vertInput += 1.0F;
-    if (keys[SDL_SCANCODE_E]) vertInput -= 1.0F;
-    if (keys[SDL_SCANCODE_J]) rollInput += 1.0F;
-    if (keys[SDL_SCANCODE_L]) rollInput -= 1.0F;
+    if (keys[SDL_SCANCODE_Q]) vertInput   += 1.0F;
+    if (keys[SDL_SCANCODE_E]) vertInput   -= 1.0F;
+    if (keys[SDL_SCANCODE_J]) rollInput   += 1.0F;
+    if (keys[SDL_SCANCODE_L]) rollInput   -= 1.0F;
 
     if (keys[SDL_SCANCODE_UP])    pitchInput += 1.0F;
     if (keys[SDL_SCANCODE_DOWN])  pitchInput -= 1.0F;
-    if (keys[SDL_SCANCODE_LEFT])  yawInput += 1.0F;
-    if (keys[SDL_SCANCODE_RIGHT]) yawInput -= 1.0F;
+    if (keys[SDL_SCANCODE_LEFT])  yawInput   += 1.0F;
+    if (keys[SDL_SCANCODE_RIGHT]) yawInput   -= 1.0F;
 
     /* Angular velocity with inertia */
     global_ship.angularVelocity.x += pitchInput * global_ship.rotationSpeed * dt;
@@ -202,12 +202,6 @@ extern void updateShip(float dt) {
     global_ship.pitch += global_ship.angularVelocity.x * dt;
     global_ship.yaw += global_ship.angularVelocity.y * dt;
     global_ship.roll += global_ship.angularVelocity.z * dt;
-
-    /* Clamp pitch to prevent flipping */
-    if (global_ship.pitch > (float)M_PI * 0.49F)
-        global_ship.pitch = (float)M_PI * 0.49F;
-    if (global_ship.pitch < -(float)M_PI * 0.49F)
-        global_ship.pitch = -(float)M_PI * 0.49F;
 
     updateOrientation();
 
