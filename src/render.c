@@ -1,16 +1,17 @@
 #include "render.h"
+#include "asteroid.h"
 #include "stars.h"
 #include "utils.h"
 #include <GL/gl.h>
 
-extern void renderTriFaces(const TriangleFace* tf_array, int count) {
+extern void renderMesh(Mesh mesh) {
     int v_index;
     int f_index;
 
     glBegin(GL_TRIANGLES);
-    for (f_index = 0; f_index < count; f_index++) {
+    for (f_index = 0; f_index < mesh.face_count; f_index++) {
         for (v_index = 0; v_index < 3; v_index++) {
-            const Vertex vert = tf_array[f_index].v[v_index];
+            const Vertex vert = mesh.faces[f_index].v[v_index];
             glColor3f(vert.albedo.x, vert.albedo.y, vert.albedo.z);
             glNormal3f(vert.normal.x, vert.normal.y, vert.normal.z);
             glTexCoord2f(vert.texture.x, vert.texture.y);
@@ -36,4 +37,18 @@ extern void renderStars(void) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
+}
+
+extern void renderAsteroids(void) {
+    int i;
+    for (i = 0; i < getAsteroidCount(); i++) {
+        const Asteroid asteroid = getAsteroids()[i];
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        {
+            glTranslatef(asteroid.position.x, asteroid.position.y, asteroid.position.z);
+            renderMesh(asteroid.mesh);
+        }
+        glPopMatrix();
+    }
 }

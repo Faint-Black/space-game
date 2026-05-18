@@ -8,6 +8,8 @@ Checks: >
   readability-*,
   llvm*,
 
+  -bugprone-narrowing-conversions,
+  -performance-type-promotion-in-math-fn,
   -readability-magic-numbers,
   -modernize-macro-to-enum,
   -clang-diagnostic-unused-command-line-argument,

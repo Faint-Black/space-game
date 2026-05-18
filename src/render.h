@@ -14,14 +14,24 @@ typedef struct TriangleFace {
     Vertex v[3];
 } TriangleFace;
 
+typedef struct Mesh {
+    TriangleFace* faces;
+    int face_count;
+} Mesh;
+
 /**
- * @brief Tells OpenGL to render an array of triangle faces (with GL_TRIANGLES).
+ * @brief Tells OpenGL to render in bulk the data of a mesh.
  */
-extern void renderTriFaces(const TriangleFace* tf_array, int count);
+extern void renderMesh(Mesh mesh);
 
 /**
  * @brief Render horizon stars.
  */
 extern void renderStars(void);
+
+/**
+ * @brief Render asteroids.
+ */
+extern void renderAsteroids(void);
 
 #endif /* RENDER_H */

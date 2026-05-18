@@ -2,10 +2,15 @@
 #define ASTEROID_H
 
 #include "render.h"
+#include "utils.h"
 
 typedef struct Asteroid {
-    TriangleFace* faces;
-    int face_count;
+    /* Graphical Vertex data */
+    Mesh mesh;
+    /* Gameplay data */
+    float mass;
+    Vec3 position;
+    Vec3 velocity;
 } Asteroid;
 
 /**

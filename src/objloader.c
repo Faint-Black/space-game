@@ -371,6 +371,7 @@ extern void freeOBJModel(OBJModel* model) {
 
 extern void renderOBJModel(const OBJModel* model) {
     int i;
+    Mesh mesh;
     if (model == NULL) return;
 
     glDisable(GL_CULL_FACE);
@@ -384,7 +385,9 @@ extern void renderOBJModel(const OBJModel* model) {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        renderTriFaces(model->materials[i].faces, model->materials[i].faceCount);
+        mesh.faces = model->materials[i].faces;
+        mesh.face_count = model->materials[i].faceCount;
+        renderMesh(mesh);
     }
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);

@@ -2,6 +2,7 @@
 #include "asteroid.h"
 #include "collision.h"
 #include "hud.h"
+#include "render.h"
 #include "score.h"
 #include "ship.h"
 #include "stars.h"
@@ -89,6 +90,8 @@ extern void gameRenderFrame(const GameState* game) {
     shipSetupCamera(w, h);
     /* Scene lighting */
     setupLighting();
+    /* Render asteroids */
+    renderAsteroids();
     /* Stars (camera-relative background) */
     renderStars();
     /* Render ship + projectiles */

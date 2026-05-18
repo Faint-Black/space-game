@@ -118,10 +118,10 @@ extern int checkCollision(Vec3 ship_pos) {
     }
 
     for (i = 0; i < count; i++) {
-        if (asteroids[i].faces == NULL || asteroids[i].face_count <= 0) {
+        if (asteroids[i].mesh.faces == NULL || asteroids[i].mesh.face_count <= 0) {
             continue;
         }
-        box = computeAABBFromFaces(asteroids[i].faces, asteroids[i].face_count);
+        box = computeAABBFromFaces(asteroids[i].mesh.faces, asteroids[i].mesh.face_count);
         if (sphereIntersectsAabb(ship_pos, SHIP_COLLISION_RADIUS, box)) {
             return 1;
         }
