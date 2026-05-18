@@ -73,6 +73,7 @@ extern void initShip() {
     global_ship.scannerRange = 50.0F;
     global_ship.scannerVisible = 1;
 
+    global_ship.cameraLocked = 0;
     global_ship.cameraMode = 0;
     global_ship.cameraDistance = 20.0F;
     global_ship.cameraHeight = 7.0F;
@@ -138,6 +139,13 @@ extern void shipToggleCamera() {
     global_ship.cameraMode = !global_ship.cameraMode;
 }
 
+extern void shipLockCamera() {
+    global_ship.cameraLocked = !global_ship.cameraLocked;
+    global_ship.cameraMode = 0;
+    global_ship.cameraYaw = 0.0F;
+    global_ship.cameraPitch = 0.15F;
+}
+
 extern void shipToggleScanner() {
     global_ship.scannerVisible = !global_ship.scannerVisible;
 }
@@ -178,6 +186,11 @@ static void updateOrientation() {
 
     /* Up = cross(right, forward) */
     global_ship.up = vec3Normalize(vec3Cross(global_ship.right, global_ship.forward));
+
+    if (global_ship.cameraLocked) {
+        global_ship.cameraYaw = global_ship.yaw;
+        global_ship.cameraPitch = -global_ship.pitch;
+    }
 }
 
 /* ======================================================================== */

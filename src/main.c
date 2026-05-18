@@ -21,7 +21,7 @@
 #define WINDOW_HEIGHT 600
 
 /* ---- Star field ---- */
-#define NUM_STARS 800
+#define NUM_STARS 8000
 static Vec3 starPositions[NUM_STARS];
 static float starBrightness[NUM_STARS];
 
@@ -41,7 +41,7 @@ static void initStars(void) {
         float mag = vec3Magnitude(dir);
         if (mag < 0.001F) { dir = vec3(0.0F, 1.0F, 0.0F); mag = 1.0F; }
         starPositions[i] = vec3MulScalar(vec3DivScalar(dir, mag), 500.0F);
-        starBrightness[i] = randfRange(0.3F, 1.0F);
+        starBrightness[i] = randfRange(0.1F, 1.0F);
     }
 }
 
@@ -170,6 +170,9 @@ static void gamePollEvents(void) {
                 break;
             case SDLK_n:
                 shipToggleScanner();
+                break;
+            case SDLK_k:
+                shipLockCamera();
                 break;
             default:
                 break;
