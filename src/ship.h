@@ -53,6 +53,7 @@ typedef struct Ship {
 
     /* Camera */
     int cameraMode;
+    int cameraLocked;
     float cameraDistance;
     float cameraHeight;
     float cameraYaw;
@@ -123,6 +124,11 @@ extern void shipToggleArm();
  * @brief Toggles the camera between 1st and 3rd person.
  */
 extern void shipToggleCamera();
+
+/**
+ * @brief Locks the camera to the center of the ship.
+ */
+extern void shipLockCamera();
 
 /**
  * @brief Toggles scanner visibility.
