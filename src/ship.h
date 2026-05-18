@@ -53,6 +53,8 @@ typedef struct Ship {
     int cameraMode;
     float cameraDistance;
     float cameraHeight;
+    float cameraYaw;
+    float cameraPitch;
 
     /* Projectiles */
     Projectile projectiles[MAX_PROJECTILES];
@@ -124,6 +126,11 @@ extern void shipToggleCamera(void);
  * @brief Toggles scanner visibility.
  */
 extern void shipToggleScanner(void);
+
+/**
+ * @brief Handles mouse motion for camera orbit.
+ */
+extern void shipMouseMotion(int dx, int dy);
 
 /**
  * @brief Sets up camera projection and view matrices.

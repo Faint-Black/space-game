@@ -125,6 +125,8 @@ static void deinitializeSDLandOpenGL(void) {
 static void gameInit(void) {
     if (initializeSDLandOpenGL() != 0) exit(EXIT_FAILURE);
 
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+
     initStars();
     initShip();
     initAsteroids(50);
@@ -171,6 +173,9 @@ static void gamePollEvents(void) {
             break;
         case SDL_KEYUP:
             shipKeyUp(sdl_event.key.keysym.scancode);
+            break;
+        case SDL_MOUSEMOTION:
+            shipMouseMotion(sdl_event.motion.xrel, sdl_event.motion.yrel);
             break;
         default:
             break;

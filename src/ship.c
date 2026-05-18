@@ -73,8 +73,10 @@ extern void initShip(void) {
     global_ship.scannerVisible = 0;
 
     global_ship.cameraMode = 0;
-    global_ship.cameraDistance = 12.0F;
-    global_ship.cameraHeight = 5.0F;
+    global_ship.cameraDistance = 20.0F;
+    global_ship.cameraHeight = 7.0F;
+    global_ship.cameraYaw = 0.0F;
+    global_ship.cameraPitch = 0.15F;
 
     global_ship.thrusting = 0;
 
@@ -137,6 +139,14 @@ extern void shipToggleCamera(void) {
 
 extern void shipToggleScanner(void) {
     global_ship.scannerVisible = !global_ship.scannerVisible;
+}
+
+extern void shipMouseMotion(int dx, int dy) {
+    float sensitivity = 0.005F;
+    global_ship.cameraYaw += (float)dx * sensitivity;
+    global_ship.cameraPitch -= (float)dy * sensitivity;
+    if (global_ship.cameraPitch < -1.2F) global_ship.cameraPitch = -1.2F;
+    if (global_ship.cameraPitch > 1.2F) global_ship.cameraPitch = 1.2F;
 }
 
 /* ======================================================================== */
@@ -297,13 +307,20 @@ extern void shipSetupCamera(int windowW, int windowH) {
     glLoadIdentity();
 
     if (global_ship.cameraMode == 0) {
-        /* 3rd person: behind and above */
-        camPos = vec3AddVector(global_ship.position,
-            vec3AddVector(
-                vec3MulScalar(global_ship.forward, -global_ship.cameraDistance),
-                vec3MulScalar(global_ship.up, global_ship.cameraHeight)));
-        lookAt = vec3AddVector(global_ship.position,
-            vec3MulScalar(global_ship.forward, 5.0F));
+        /* 3rd person: orbit camera using mouse angles */
+        float cy = (float)cos((double)global_ship.cameraYaw);
+        float sy = (float)sin((double)global_ship.cameraYaw);
+        float cp = (float)cos((double)global_ship.cameraPitch);
+        float sp = (float)sin((double)global_ship.cameraPitch);
+        float dist = global_ship.cameraDistance;
+        Vec3 offset;
+
+        offset.x = dist * cp * sy;
+        offset.y = dist * sp;
+        offset.z = dist * cp * cy;
+
+        camPos = vec3AddVector(global_ship.position, offset);
+        lookAt = global_ship.position;
     } else {
         /* 1st person: cockpit */
         camPos = vec3AddVector(global_ship.position,
@@ -316,7 +333,7 @@ extern void shipSetupCamera(int windowW, int windowH) {
     gluLookAt(
         (double)camPos.x, (double)camPos.y, (double)camPos.z,
         (double)lookAt.x, (double)lookAt.y, (double)lookAt.z,
-        (double)global_ship.up.x, (double)global_ship.up.y, (double)global_ship.up.z);
+        0.0, 1.0, 0.0);
 }
 
 /* ======================================================================== */
