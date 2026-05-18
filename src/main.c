@@ -1,9 +1,9 @@
 #include "asteroid.h"
+#include "collision.h"
+#include "hud.h"
+#include "score.h"
 #include "ship.h"
 #include "utils.h"
-#include "hud.h"
-#include "collision.h"
-#include "score.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
@@ -39,7 +39,10 @@ static void initStars(void) {
     for (i = 0; i < NUM_STARS; i++) {
         Vec3 dir = vec3(randf() - 0.5F, randf() - 0.5F, randf() - 0.5F);
         float mag = vec3Magnitude(dir);
-        if (mag < 0.001F) { dir = vec3(0.0F, 1.0F, 0.0F); mag = 1.0F; }
+        if (mag < 0.001F) {
+            dir = vec3(0.0F, 1.0F, 0.0F);
+            mag = 1.0F;
+        }
         starPositions[i] = vec3MulScalar(vec3DivScalar(dir, mag), 500.0F);
         starBrightness[i] = randfRange(0.1F, 1.0F);
     }
@@ -54,9 +57,7 @@ static void renderStars(void) {
     for (i = 0; i < NUM_STARS; i++) {
         float b = starBrightness[i];
         glColor3f(b, b, b * 0.95F);
-        glVertex3f(starPositions[i].x,
-                   starPositions[i].y,
-                   starPositions[i].z);
+        glVertex3f(starPositions[i].x, starPositions[i].y, starPositions[i].z);
     }
     glEnd();
     glEnable(GL_DEPTH_TEST);
@@ -149,43 +150,23 @@ static void gamePollEvents(void) {
     SDL_Event sdl_event;
     while (SDL_PollEvent(&sdl_event)) {
         switch (sdl_event.type) {
-        case SDL_QUIT:
-            global_app_should_run = false;
-            break;
+        case SDL_QUIT: global_app_should_run = false; break;
         case SDL_KEYDOWN:
             if (sdl_event.key.repeat) break;
             shipKeyDown(sdl_event.key.keysym.scancode);
             switch (sdl_event.key.keysym.sym) {
-            case SDLK_ESCAPE:
-                global_app_should_run = false;
-                break;
-            case SDLK_SPACE:
-                shipFireProjectile();
-                break;
-            case SDLK_c:
-                shipToggleCamera();
-                break;
-            case SDLK_g:
-                shipToggleArm();
-                break;
-            case SDLK_n:
-                shipToggleScanner();
-                break;
-            case SDLK_k:
-                shipLockCamera();
-                break;
-            default:
-                break;
+            case SDLK_ESCAPE: global_app_should_run = false; break;
+            case SDLK_SPACE: shipFireProjectile(); break;
+            case SDLK_c: shipToggleCamera(); break;
+            case SDLK_g: shipToggleArm(); break;
+            case SDLK_n: shipToggleScanner(); break;
+            case SDLK_k: shipLockCamera(); break;
+            default: break;
             }
             break;
-        case SDL_KEYUP:
-            shipKeyUp(sdl_event.key.keysym.scancode);
-            break;
-        case SDL_MOUSEMOTION:
-            shipMouseMotion(sdl_event.motion.xrel, sdl_event.motion.yrel);
-            break;
-        default:
-            break;
+        case SDL_KEYUP: shipKeyUp(sdl_event.key.keysym.scancode); break;
+        case SDL_MOUSEMOTION: shipMouseMotion(sdl_event.motion.xrel, sdl_event.motion.yrel); break;
+        default: break;
         }
     }
 }

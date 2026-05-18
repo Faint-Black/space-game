@@ -8,11 +8,13 @@ SDL2_CFLAGS  := $(shell pkg-config --cflags sdl2)
 SDL2_LDFLAGS := $(shell pkg-config --libs sdl2)
 IMG_CFLAGS   := $(shell pkg-config --cflags SDL2_image)
 IMG_LDFLAGS  := $(shell pkg-config --libs SDL2_image)
+GLU_CFLAGS   := $(shell pkg-config --cflags glu)
+GLU_LDFLAGS  := $(shell pkg-config --libs glu)
 
-CFLAGS       += -O2 -g -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Werror
-CFLAGS       += $(GL_CFLAGS) $(SDL2_CFLAGS) $(IMG_CFLAGS)
-LDFLAGS      += -lm -lGLU
-LDFLAGS      += $(GL_LDFLAGS) $(SDL2_LDFLAGS) $(IMG_LDFLAGS)
+CFLAGS       += -ansi -O2 -g -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Werror
+CFLAGS       += $(GL_CFLAGS) $(SDL2_CFLAGS) $(IMG_CFLAGS) $(GLU_CFLAGS)
+LDFLAGS      += -lm
+LDFLAGS      += $(GL_LDFLAGS) $(SDL2_LDFLAGS) $(IMG_LDFLAGS) $(GLU_LDFLAGS)
 
 SOURCES      := $(wildcard src/*.c)
 HEADERS      := $(wildcard src/*.h)

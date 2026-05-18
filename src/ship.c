@@ -120,10 +120,8 @@ extern void shipFireProjectile() {
     int i;
     for (i = 0; i < MAX_PROJECTILES; i++) {
         if (!global_ship.projectiles[i].active) {
-            global_ship.projectiles[i].position = vec3AddVector(
-                global_ship.position, vec3MulScalar(global_ship.forward, 3.0F));
-            global_ship.projectiles[i].velocity = vec3AddVector(
-                global_ship.velocity, vec3MulScalar(global_ship.forward, PROJECTILE_SPEED));
+            global_ship.projectiles[i].position = vec3AddVector(global_ship.position, vec3MulScalar(global_ship.forward, 3.0F));
+            global_ship.projectiles[i].velocity = vec3AddVector(global_ship.velocity, vec3MulScalar(global_ship.forward, PROJECTILE_SPEED));
             global_ship.projectiles[i].life = PROJECTILE_LIFETIME;
             global_ship.projectiles[i].active = 1;
             break;
@@ -219,9 +217,9 @@ extern void updateShip(float dt) {
     if (keys[SDL_SCANCODE_J]) rollInput += 1.0F;
     if (keys[SDL_SCANCODE_L]) rollInput -= 1.0F;
 
-    if (keys[SDL_SCANCODE_UP])    pitchInput += 1.0F;
-    if (keys[SDL_SCANCODE_DOWN])  pitchInput -= 1.0F;
-    if (keys[SDL_SCANCODE_LEFT])  yawInput += 1.0F;
+    if (keys[SDL_SCANCODE_UP]) pitchInput += 1.0F;
+    if (keys[SDL_SCANCODE_DOWN]) pitchInput -= 1.0F;
+    if (keys[SDL_SCANCODE_LEFT]) yawInput += 1.0F;
     if (keys[SDL_SCANCODE_RIGHT]) yawInput -= 1.0F;
 
     /* Angular velocity with inertia */
@@ -245,16 +243,13 @@ extern void updateShip(float dt) {
 
     thrust = vec3Null();
     if (thrustInput != 0.0F) {
-        thrust = vec3AddVector(thrust,
-            vec3MulScalar(global_ship.forward, thrustInput * global_ship.thrustPower));
+        thrust = vec3AddVector(thrust, vec3MulScalar(global_ship.forward, thrustInput * global_ship.thrustPower));
     }
     if (strafeInput != 0.0F) {
-        thrust = vec3AddVector(thrust,
-            vec3MulScalar(global_ship.right, strafeInput * global_ship.thrustPower));
+        thrust = vec3AddVector(thrust, vec3MulScalar(global_ship.right, strafeInput * global_ship.thrustPower));
     }
     if (vertInput != 0.0F) {
-        thrust = vec3AddVector(thrust,
-            vec3MulScalar(global_ship.up, vertInput * global_ship.thrustPower));
+        thrust = vec3AddVector(thrust, vec3MulScalar(global_ship.up, vertInput * global_ship.thrustPower));
     }
 
     /* Apply acceleration (F=ma, m=1) */
@@ -264,8 +259,7 @@ extern void updateShip(float dt) {
     global_ship.velocity = vec3MulScalar(global_ship.velocity, 1.0F - global_ship.dampingLinear);
 
     /* Update position */
-    global_ship.position = vec3AddVector(global_ship.position,
-        vec3MulScalar(global_ship.velocity, dt));
+    global_ship.position = vec3AddVector(global_ship.position, vec3MulScalar(global_ship.velocity, dt));
 
     /* Thruster animation */
     targetAngle = thrustInput * 15.0F;
@@ -285,9 +279,8 @@ extern void updateShip(float dt) {
     /* Update projectiles */
     for (i = 0; i < MAX_PROJECTILES; i++) {
         if (global_ship.projectiles[i].active) {
-            global_ship.projectiles[i].position = vec3AddVector(
-                global_ship.projectiles[i].position,
-                vec3MulScalar(global_ship.projectiles[i].velocity, dt));
+            global_ship.projectiles[i].position =
+                vec3AddVector(global_ship.projectiles[i].position, vec3MulScalar(global_ship.projectiles[i].velocity, dt));
             global_ship.projectiles[i].life -= dt;
             if (global_ship.projectiles[i].life <= 0.0F) {
                 global_ship.projectiles[i].active = 0;
@@ -333,17 +326,11 @@ extern void shipSetupCamera(int windowW, int windowH) {
         lookAt = global_ship.position;
     } else {
         /* 1st person: cockpit */
-        camPos = vec3AddVector(global_ship.position,
-            vec3AddVector(
-                vec3MulScalar(global_ship.up, 0.8F),
-                vec3MulScalar(global_ship.forward, 1.5F)));
+        camPos = vec3AddVector(global_ship.position, vec3AddVector(vec3MulScalar(global_ship.up, 0.8F), vec3MulScalar(global_ship.forward, 1.5F)));
         lookAt = vec3AddVector(camPos, vec3MulScalar(global_ship.forward, 10.0F));
     }
 
-    gluLookAt(
-        (double)camPos.x, (double)camPos.y, (double)camPos.z,
-        (double)lookAt.x, (double)lookAt.y, (double)lookAt.z,
-        0.0, 1.0, 0.0);
+    gluLookAt((double)camPos.x, (double)camPos.y, (double)camPos.z, (double)lookAt.x, (double)lookAt.y, (double)lookAt.z, 0.0, 1.0, 0.0);
 }
 
 /* ======================================================================== */
@@ -355,28 +342,40 @@ static void drawSimpleCube(float size) {
     glBegin(GL_QUADS);
     /* Front */
     glNormal3f(0, 0, 1);
-    glVertex3f(-h, -h, h); glVertex3f(h, -h, h);
-    glVertex3f(h, h, h); glVertex3f(-h, h, h);
+    glVertex3f(-h, -h, h);
+    glVertex3f(h, -h, h);
+    glVertex3f(h, h, h);
+    glVertex3f(-h, h, h);
     /* Back */
     glNormal3f(0, 0, -1);
-    glVertex3f(h, -h, -h); glVertex3f(-h, -h, -h);
-    glVertex3f(-h, h, -h); glVertex3f(h, h, -h);
+    glVertex3f(h, -h, -h);
+    glVertex3f(-h, -h, -h);
+    glVertex3f(-h, h, -h);
+    glVertex3f(h, h, -h);
     /* Top */
     glNormal3f(0, 1, 0);
-    glVertex3f(-h, h, h); glVertex3f(h, h, h);
-    glVertex3f(h, h, -h); glVertex3f(-h, h, -h);
+    glVertex3f(-h, h, h);
+    glVertex3f(h, h, h);
+    glVertex3f(h, h, -h);
+    glVertex3f(-h, h, -h);
     /* Bottom */
     glNormal3f(0, -1, 0);
-    glVertex3f(-h, -h, -h); glVertex3f(h, -h, -h);
-    glVertex3f(h, -h, h); glVertex3f(-h, -h, h);
+    glVertex3f(-h, -h, -h);
+    glVertex3f(h, -h, -h);
+    glVertex3f(h, -h, h);
+    glVertex3f(-h, -h, h);
     /* Right */
     glNormal3f(1, 0, 0);
-    glVertex3f(h, -h, h); glVertex3f(h, -h, -h);
-    glVertex3f(h, h, -h); glVertex3f(h, h, h);
+    glVertex3f(h, -h, h);
+    glVertex3f(h, -h, -h);
+    glVertex3f(h, h, -h);
+    glVertex3f(h, h, h);
     /* Left */
     glNormal3f(-1, 0, 0);
-    glVertex3f(-h, -h, -h); glVertex3f(-h, -h, h);
-    glVertex3f(-h, h, h); glVertex3f(-h, h, -h);
+    glVertex3f(-h, -h, -h);
+    glVertex3f(-h, -h, h);
+    glVertex3f(-h, h, h);
+    glVertex3f(-h, h, -h);
     glEnd();
 }
 
@@ -565,10 +564,7 @@ extern void renderShip() {
     for (i = 0; i < MAX_PROJECTILES; i++) {
         if (global_ship.projectiles[i].active) {
             glPushMatrix();
-            glTranslatef(
-                global_ship.projectiles[i].position.x,
-                global_ship.projectiles[i].position.y,
-                global_ship.projectiles[i].position.z);
+            glTranslatef(global_ship.projectiles[i].position.x, global_ship.projectiles[i].position.y, global_ship.projectiles[i].position.z);
             drawSimpleSphere(0.15F, 6, 4);
             glPopMatrix();
         }

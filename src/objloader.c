@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_VERTICES  4096
-#define MAX_NORMALS   4096
+#define MAX_VERTICES 4096
+#define MAX_NORMALS 4096
 #define MAX_TEXCOORDS 4096
-#define MAX_FACES     4096
+#define MAX_FACES 4096
 
 /* ---- Internal helpers ---- */
 
@@ -48,8 +48,7 @@ static GLuint uploadTexture(const char* path) {
         format = GL_RGB;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)format, surface->w, surface->h,
-                 0, format, GL_UNSIGNED_BYTE, surface->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)format, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -98,7 +97,7 @@ static void parseMTL(const char* mtlPath, OBJModel* model) {
             nl = strchr(texName, '\r');
             if (nl) *nl = '\0';
 
-            snprintf(fullPath, sizeof(fullPath), "%s%s", dir, texName);
+            sprintf(fullPath, "%s%s", dir, texName);
             memcpy(model->materials[currentMat].texturePath, fullPath, 255);
             model->materials[currentMat].texturePath[255] = '\0';
         }
@@ -166,7 +165,7 @@ extern OBJModel* loadOBJModel(const char* objPath) {
             char mtlName[256];
             char mtlPath[512];
             sscanf(line + 7, " %255[^\r\n]", mtlName);
-            snprintf(mtlPath, sizeof(mtlPath), "%s%s", dir, mtlName);
+            sprintf(mtlPath, "%s%s", dir, mtlName);
             parseMTL(mtlPath, model);
             break;
         }
@@ -273,8 +272,10 @@ extern OBJModel* loadOBJModel(const char* objPath) {
                     break;
                 }
                 /* advance past this token */
-                while (*ptr != '\0' && *ptr != ' ' && *ptr != '\t') ptr++;
-                while (*ptr == ' ' || *ptr == '\t') ptr++;
+                while (*ptr != '\0' && *ptr != ' ' && *ptr != '\t')
+                    ptr++;
+                while (*ptr == ' ' || *ptr == '\t')
+                    ptr++;
             }
 
             /* triangulate polygon as fan: (0,1,2), (0,2,3), ... */
@@ -348,8 +349,7 @@ extern OBJModel* loadOBJModel(const char* objPath) {
         }
     }
 
-    SDL_Log("OBJ loaded: %d materials, %d verts, %d norms, %d texcoords",
-            model->materialCount, posCount, normCount, tcCount);
+    SDL_Log("OBJ loaded: %d materials, %d verts, %d norms, %d texcoords", model->materialCount, posCount, normCount, tcCount);
 
     return model;
 }

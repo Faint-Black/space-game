@@ -5,19 +5,19 @@
 /*  HUD layout constants                                                     */
 /* ======================================================================== */
 
-#define HUD_MARGIN         30.0F
-#define HUD_LINE_WIDTH     2.5F
+#define HUD_MARGIN 30.0F
+#define HUD_LINE_WIDTH 2.5F
 
-#define DIGIT_WIDTH        16.0F
-#define DIGIT_HEIGHT       24.0F
-#define DIGIT_SPACING      6.0F
-#define MAX_DIGITS         12
+#define DIGIT_WIDTH 16.0F
+#define DIGIT_HEIGHT 24.0F
+#define DIGIT_SPACING 6.0F
+#define MAX_DIGITS 12
 
-#define LIFE_ICON_RADIUS   10.0F
-#define LIFE_ICON_GAP      28.0F
-#define SCORE_ICON_RADIUS  12.0F
-#define CROSSHAIR_RADIUS   10.0F
-#define CROSSHAIR_GAP      3.0F
+#define LIFE_ICON_RADIUS 10.0F
+#define LIFE_ICON_GAP 28.0F
+#define SCORE_ICON_RADIUS 12.0F
+#define CROSSHAIR_RADIUS 10.0F
+#define CROSSHAIR_GAP 3.0F
 
 /* HUD tint: green-cyan CRT readout. */
 #define HUD_COLOR_R 0.0F
@@ -68,13 +68,13 @@ static void drawDigit(int d, float x, float y) {
     h = DIGIT_HEIGHT;
     mid = h * 0.5F;
 
-    if ((mask & 0x01) != 0) hudLine(x,     y + h,   x + w, y + h);
+    if ((mask & 0x01) != 0) hudLine(x, y + h, x + w, y + h);
     if ((mask & 0x02) != 0) hudLine(x + w, y + mid, x + w, y + h);
-    if ((mask & 0x04) != 0) hudLine(x + w, y,       x + w, y + mid);
-    if ((mask & 0x08) != 0) hudLine(x,     y,       x + w, y);
-    if ((mask & 0x10) != 0) hudLine(x,     y,       x,     y + mid);
-    if ((mask & 0x20) != 0) hudLine(x,     y + mid, x,     y + h);
-    if ((mask & 0x40) != 0) hudLine(x,     y + mid, x + w, y + mid);
+    if ((mask & 0x04) != 0) hudLine(x + w, y, x + w, y + mid);
+    if ((mask & 0x08) != 0) hudLine(x, y, x + w, y);
+    if ((mask & 0x10) != 0) hudLine(x, y, x, y + mid);
+    if ((mask & 0x20) != 0) hudLine(x, y + mid, x, y + h);
+    if ((mask & 0x40) != 0) hudLine(x, y + mid, x + w, y + mid);
 }
 
 /**
@@ -113,7 +113,7 @@ static void drawNumber(int value, float x_left, float y) {
 static void drawLifeIcon(float cx, float cy) {
     float r = LIFE_ICON_RADIUS;
     glBegin(GL_TRIANGLES);
-    glVertex2f(cx,            cy + r);
+    glVertex2f(cx, cy + r);
     glVertex2f(cx - r * 0.7F, cy - r * 0.5F);
     glVertex2f(cx + r * 0.7F, cy - r * 0.5F);
     glEnd();
@@ -123,9 +123,9 @@ static void drawLifeIcon(float cx, float cy) {
 static void drawScoreIcon(float cx, float cy) {
     float r = SCORE_ICON_RADIUS;
     glBegin(GL_LINE_LOOP);
-    glVertex2f(cx,     cy + r);
+    glVertex2f(cx, cy + r);
     glVertex2f(cx + r, cy);
-    glVertex2f(cx,     cy - r);
+    glVertex2f(cx, cy - r);
     glVertex2f(cx - r, cy);
     glEnd();
 }
@@ -168,7 +168,7 @@ extern void renderHUD(int score, int lives) {
     /* Cache state we are about to mutate so the 3D scene rendering is undisturbed. */
     depth_was_enabled = glIsEnabled(GL_DEPTH_TEST);
     light_was_enabled = glIsEnabled(GL_LIGHTING);
-    cull_was_enabled  = glIsEnabled(GL_CULL_FACE);
+    cull_was_enabled = glIsEnabled(GL_CULL_FACE);
     glGetFloatv(GL_CURRENT_COLOR, saved_color);
     glGetFloatv(GL_LINE_WIDTH, &saved_line_width);
 
@@ -190,16 +190,12 @@ extern void renderHUD(int score, int lives) {
     glColor3f(HUD_COLOR_R, HUD_COLOR_G, HUD_COLOR_B);
 
     /* Score (top-left). */
-    drawScoreIcon(HUD_MARGIN + SCORE_ICON_RADIUS,
-                  h - HUD_MARGIN - SCORE_ICON_RADIUS);
-    drawNumber(score,
-               HUD_MARGIN + (SCORE_ICON_RADIUS * 2.0F) + 16.0F,
-               h - HUD_MARGIN - DIGIT_HEIGHT);
+    drawScoreIcon(HUD_MARGIN + SCORE_ICON_RADIUS, h - HUD_MARGIN - SCORE_ICON_RADIUS);
+    drawNumber(score, HUD_MARGIN + (SCORE_ICON_RADIUS * 2.0F) + 16.0F, h - HUD_MARGIN - DIGIT_HEIGHT);
 
     /* Lives (top-right). */
     for (i = 0; i < lives; i++) {
-        drawLifeIcon(w - HUD_MARGIN - LIFE_ICON_RADIUS - (float)i * LIFE_ICON_GAP,
-                     h - HUD_MARGIN - LIFE_ICON_RADIUS);
+        drawLifeIcon(w - HUD_MARGIN - LIFE_ICON_RADIUS - (float)i * LIFE_ICON_GAP, h - HUD_MARGIN - LIFE_ICON_RADIUS);
     }
 
     /* Crosshair (center). */

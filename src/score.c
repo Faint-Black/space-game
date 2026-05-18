@@ -2,8 +2,8 @@
 
 /* Point and life tuning knobs. Tweak as the game's balance evolves. */
 #define POINTS_PER_ASTEROID 10
-#define POINTS_PER_MODULE   50
-#define INITIAL_LIVES       3
+#define POINTS_PER_MODULE 50
+#define INITIAL_LIVES 3
 
 typedef struct {
     int points;

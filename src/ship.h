@@ -1,8 +1,8 @@
 #ifndef SHIP_H
 #define SHIP_H
 
-#include "utils.h"
 #include "objloader.h"
+#include "utils.h"
 
 #define MAX_PROJECTILES 50
 #define PROJECTILE_SPEED 80.0F
