@@ -58,7 +58,7 @@ static Mesh generateSphereMesh(int stacks, int sections) {
                 const Vertex v1 = makeSphereVertex(theta2, phi1);
                 const Vertex v2 = makeSphereVertex(theta2, phi2);
 
-                appendTriangle(result.faces, &f, north_pole, v1, v2);
+                appendTriangle(result.faces, &f, v1, north_pole, v2);
             }
         }
         /* south pole case */
