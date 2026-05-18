@@ -70,7 +70,7 @@ extern void initShip(void) {
 
     global_ship.scannerAngle = 25.0F * (float)M_PI / 180.0F;
     global_ship.scannerRange = 50.0F;
-    global_ship.scannerVisible = 0;
+    global_ship.scannerVisible = 1;
 
     global_ship.cameraMode = 0;
     global_ship.cameraDistance = 20.0F;
