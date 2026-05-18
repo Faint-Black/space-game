@@ -143,8 +143,8 @@ extern void shipToggleScanner(void) {
 
 extern void shipMouseMotion(int dx, int dy) {
     float sensitivity = 0.005F;
-    global_ship.cameraYaw += (float)dx * sensitivity;
-    global_ship.cameraPitch -= (float)dy * sensitivity;
+    global_ship.cameraYaw -= (float)dx * sensitivity;
+    global_ship.cameraPitch += (float)dy * sensitivity;
     if (global_ship.cameraPitch < -1.2F) global_ship.cameraPitch = -1.2F;
     if (global_ship.cameraPitch > 1.2F) global_ship.cameraPitch = 1.2F;
 }
