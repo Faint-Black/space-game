@@ -1,41 +1,60 @@
 #include "score.h"
 
-/* Valores de pontuação - ajustáveis conforme o jogo evoluir. */
+/* Point and life tuning knobs. Tweak as the game's balance evolves. */
 #define POINTS_PER_ASTEROID 10
 #define POINTS_PER_MODULE   50
 #define INITIAL_LIVES       3
 
-void scoreInit(Score* s) {
-    s->points = 0;
-    s->lives = INITIAL_LIVES;
-    s->asteroidsDestroyed = 0;
-    s->modulesCollected = 0;
+typedef struct {
+    int points;
+    int lives;
+    int asteroidsDestroyed;
+    int modulesCollected;
+} Score;
+
+/* Single per-process score instance, mirroring the global_ship pattern used
+ * elsewhere in the project. */
+static Score global_score;
+
+extern void scoreInit(void) {
+    global_score.points = 0;
+    global_score.lives = INITIAL_LIVES;
+    global_score.asteroidsDestroyed = 0;
+    global_score.modulesCollected = 0;
 }
 
-void scoreAddAsteroidDestroyed(Score* s) {
-    s->points += POINTS_PER_ASTEROID;
-    s->asteroidsDestroyed++;
+extern void scoreAddAsteroidDestroyed(void) {
+    global_score.points += POINTS_PER_ASTEROID;
+    global_score.asteroidsDestroyed++;
 }
 
-void scoreAddModuleCollected(Score* s) {
-    s->points += POINTS_PER_MODULE;
-    s->modulesCollected++;
+extern void scoreAddModuleCollected(void) {
+    global_score.points += POINTS_PER_MODULE;
+    global_score.modulesCollected++;
 }
 
-void scoreLoseLife(Score* s) {
-    if (s->lives > 0) {
-        s->lives--;
+extern void scoreLoseLife(void) {
+    if (global_score.lives > 0) {
+        global_score.lives--;
     }
 }
 
-int scoreGetPoints(const Score* s) {
-    return s->points;
+extern int scoreGetPoints(void) {
+    return global_score.points;
 }
 
-int scoreGetLives(const Score* s) {
-    return s->lives;
+extern int scoreGetLives(void) {
+    return global_score.lives;
 }
 
-int scoreIsGameOver(const Score* s) {
-    return s->lives <= 0;
+extern int scoreGetAsteroidsDestroyed(void) {
+    return global_score.asteroidsDestroyed;
+}
+
+extern int scoreGetModulesCollected(void) {
+    return global_score.modulesCollected;
+}
+
+extern int scoreIsGameOver(void) {
+    return (global_score.lives <= 0);
 }
