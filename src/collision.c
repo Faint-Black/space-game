@@ -1,50 +1,130 @@
 #include "collision.h"
+#include "asteroid.h"
+#include "render.h"
 #include "utils.h"
+#include <stddef.h>
 
-//Expands the bounding box limits to include the given point
-static void aabbExpandPoint(AABB *box, Vec3 p) {
-    //Update min bounds if point is outside
+/* Ship is treated as a sphere of this radius around its position for broad-phase tests. */
+#define SHIP_COLLISION_RADIUS 1.5F
+
+/* ======================================================================== */
+/*  AABB primitives                                                          */
+/* ======================================================================== */
+
+/**
+ * @brief Expands the bounding box limits to include the given point.
+ */
+static void aabbExpandPoint(AABB* box, Vec3 p) {
     if (p.x < box->min.x) box->min.x = p.x;
     if (p.y < box->min.y) box->min.y = p.y;
     if (p.z < box->min.z) box->min.z = p.z;
-    //Update max bounds if point is outside
     if (p.x > box->max.x) box->max.x = p.x;
     if (p.y > box->max.y) box->max.y = p.y;
     if (p.z > box->max.z) box->max.z = p.z;
 }
 
-//Computes the AABB that bounds a single triangle face
-static AABB aabbFromFace(const TriangleFace *f) {
+/**
+ * @brief Computes the AABB that bounds a single triangle face.
+ */
+static AABB aabbFromFace(const TriangleFace* f) {
     AABB box;
-    box.min = box.max = f->v[0].position; //Initialize box to the first vertex position
-    //Expand box to include the other two vertices of the face
+    box.min = f->v[0].position;
+    box.max = f->v[0].position;
     aabbExpandPoint(&box, f->v[1].position);
     aabbExpandPoint(&box, f->v[2].position);
     return box;
 }
 
-//Creates a new AABB that is the union of two AABBs
+/**
+ * @brief Returns the smallest AABB that fully contains both input boxes.
+ */
 static AABB aabbUnion(AABB a, AABB b) {
     AABB result;
-    //check  the smaller min bounds
-    result.min.x = a.min.x < b.min.x ? a.min.x : b.min.x;
-    result.min.y = a.min.y < b.min.y ? a.min.y : b.min.y;
-    result.min.z = a.min.z < b.min.z ? a.min.z : b.min.z;
-    //check the larger max bounds
-    result.max.x = a.max.x > b.max.x ? a.max.x : b.max.x;
-    result.max.y = a.max.y > b.max.y ? a.max.y : b.max.y;
-    result.max.z = a.max.z > b.max.z ? a.max.z : b.max.z;
+    result.min.x = (a.min.x < b.min.x) ? a.min.x : b.min.x;
+    result.min.y = (a.min.y < b.min.y) ? a.min.y : b.min.y;
+    result.min.z = (a.min.z < b.min.z) ? a.min.z : b.min.z;
+    result.max.x = (a.max.x > b.max.x) ? a.max.x : b.max.x;
+    result.max.y = (a.max.y > b.max.y) ? a.max.y : b.max.y;
+    result.max.z = (a.max.z > b.max.z) ? a.max.z : b.max.z;
     return result;
 }
 
-// 
-extern AABB computeAABBFromFaces(const TriangleFace *faces, int count){
+extern AABB computeAABBFromFaces(const TriangleFace* faces, int count) {
     AABB box;
     int i;
+
+    box.min = vec3Null();
+    box.max = vec3Null();
+
+    if (faces == NULL || count <= 0) {
+        return box;
+    }
+
+    box = aabbFromFace(&faces[0]);
+    for (i = 1; i < count; i++) {
+        box = aabbUnion(box, aabbFromFace(&faces[i]));
+    }
+    return box;
 }
 
-/* TODO */
+/* ======================================================================== */
+/*  Sphere vs AABB overlap (squared distance, no sqrt)                       */
+/* ======================================================================== */
+
+/**
+ * @retval 1 The sphere and the box overlap.
+ * @retval 0 The sphere and the box are disjoint.
+ */
+static int sphereIntersectsAabb(Vec3 center, float radius, AABB box) {
+    float dx = 0.0F;
+    float dy = 0.0F;
+    float dz = 0.0F;
+    float squared_distance;
+
+    if (center.x < box.min.x)
+        dx = box.min.x - center.x;
+    else if (center.x > box.max.x)
+        dx = center.x - box.max.x;
+
+    if (center.y < box.min.y)
+        dy = box.min.y - center.y;
+    else if (center.y > box.max.y)
+        dy = center.y - box.max.y;
+
+    if (center.z < box.min.z)
+        dz = box.min.z - center.z;
+    else if (center.z > box.max.z)
+        dz = center.z - box.max.z;
+
+    squared_distance = (dx * dx) + (dy * dy) + (dz * dz);
+    return (squared_distance <= (radius * radius));
+}
+
+/* ======================================================================== */
+/*  Public collision query                                                   */
+/* ======================================================================== */
+
 extern int checkCollision(Vec3 ship_pos) {
-    (void)ship_pos;
+    const Asteroid* asteroids;
+    int count;
+    int i;
+    AABB box;
+
+    asteroids = getAsteroids();
+    count = getAsteroidCount();
+
+    if (asteroids == NULL || count <= 0) {
+        return 0;
+    }
+
+    for (i = 0; i < count; i++) {
+        if (asteroids[i].faces == NULL || asteroids[i].face_count <= 0) {
+            continue;
+        }
+        box = computeAABBFromFaces(asteroids[i].faces, asteroids[i].face_count);
+        if (sphereIntersectsAabb(ship_pos, SHIP_COLLISION_RADIUS, box)) {
+            return 1;
+        }
+    }
     return 0;
 }
