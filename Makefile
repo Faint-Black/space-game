@@ -9,7 +9,7 @@ SDL2_LDFLAGS := $(shell pkg-config --libs sdl2)
 IMG_CFLAGS   := $(shell pkg-config --cflags SDL2_image)
 IMG_LDFLAGS  := $(shell pkg-config --libs SDL2_image)
 
-CFLAGS       += -ansi -O2 -g -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Werror
+CFLAGS       += -O2 -g -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 -Werror
 CFLAGS       += $(GL_CFLAGS) $(SDL2_CFLAGS) $(IMG_CFLAGS)
 LDFLAGS      += -lm -lGLU
 LDFLAGS      += $(GL_LDFLAGS) $(SDL2_LDFLAGS) $(IMG_LDFLAGS)

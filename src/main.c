@@ -1,6 +1,9 @@
 #include "asteroid.h"
 #include "ship.h"
 #include "utils.h"
+#include "hud.h"
+#include "collision.h"
+#include "score.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
@@ -130,6 +133,7 @@ static void gameInit(void) {
     initStars();
     initShip();
     initAsteroids(50);
+    scoreInit();
 
     global_last_frame_time = SDL_GetTicks();
 }
@@ -193,6 +197,10 @@ static void gameUpdate(void) {
     if (dt > 0.05F) dt = 0.05F;
 
     updateShip(dt);
+
+    if (checkCollision(getShipPosition())) {
+        scoreLoseLife();
+    }
 }
 
 static void setupLighting(void) {
@@ -229,6 +237,9 @@ static void gameRenderFrame(void) {
 
     /* Render scanner overlay */
     renderScanner();
+
+    /* Render HUD on top */
+    renderHUD(scoreGetPoints(), scoreGetLives());
 
     /* swap front and back buffers */
     SDL_GL_SwapWindow(global_sdl_window);
