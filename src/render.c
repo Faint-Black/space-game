@@ -1,4 +1,5 @@
 #include "render.h"
+#include "stars.h"
 #include "utils.h"
 #include <GL/gl.h>
 
@@ -17,4 +18,22 @@ extern void renderTriFaces(const TriangleFace* tf_array, int count) {
         }
     }
     glEnd();
+}
+
+extern void renderStars(void) {
+    int i;
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glPointSize(2.0F);
+
+    glBegin(GL_POINTS);
+    for (i = 0; i < getStarCount(); i++) {
+        const Star star = getStars()[i];
+        glColor3f(star.brightness, star.brightness, star.brightness * 0.95F);
+        glVertex3f(star.position.x, star.position.y, star.position.z);
+    }
+    glEnd();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
 }

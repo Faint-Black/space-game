@@ -19,4 +19,9 @@ typedef struct TriangleFace {
  */
 extern void renderTriFaces(const TriangleFace* tf_array, int count);
 
+/**
+ * @brief Render horizon stars.
+ */
+extern void renderStars(void);
+
 #endif /* RENDER_H */

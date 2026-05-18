@@ -1,11 +1,34 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define PI 3.14159265358979323846
+
 typedef struct Vec3 {
     float x;
     float y;
     float z;
 } Vec3;
+
+/**
+ * @brief Returns a random normalized float.
+ *
+ * @return [0..1]
+ */
+extern float randNormalizedFloat(void);
+
+/**
+ * @brief Returns a random centered float.
+ *
+ * @return [-1..1]
+ */
+extern float randCenteredFloat(void);
+
+/**
+ * @brief Returns a random float between a range.
+ *
+ * @return [min..max]
+ */
+extern float randRangedFloat(float min, float max);
 
 /**
  * @brief Creates a new vector from individual components.
@@ -20,6 +43,13 @@ extern Vec3 vec3(float x, float y, float z);
  * @return Vector(0, 0, 0)
  */
 extern Vec3 vec3Null(void);
+
+/**
+ * @brief Creates a random unit vector. Magnitude is garanteed to be 1.
+ *
+ * @return Vector(random, random, random)
+ */
+extern Vec3 vec3Random(void);
 
 /**
  * @brief Computes the sum of 2 vectors.

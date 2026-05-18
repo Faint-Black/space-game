@@ -1,6 +1,20 @@
 #include "utils.h"
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
+
+extern float randNormalizedFloat(void) {
+    return (float)rand() / (float)RAND_MAX;
+}
+
+extern float randCenteredFloat(void) {
+    const float normal = randNormalizedFloat();
+    return (rand() % 2 == 0) ? (normal) : (-normal);
+}
+
+extern float randRangedFloat(float min, float max) {
+    return min + randNormalizedFloat() * (max - min);
+}
 
 extern Vec3 vec3(float x, float y, float z) {
     Vec3 result;
@@ -14,6 +28,13 @@ extern Vec3 vec3Null(void) {
     Vec3 result;
     result.x = result.y = result.z = 0.0F;
     return result;
+}
+
+extern Vec3 vec3Random(void) {
+    const double phi = 2.0 * PI * randNormalizedFloat();
+    const float cos_theta = randCenteredFloat();
+    const float sin_theta = (float)sqrt(1.0 - cos_theta * cos_theta);
+    return vec3(sin_theta * (float)cos(phi), sin_theta * (float)sin(phi), cos_theta);
 }
 
 extern Vec3 vec3AddVector(Vec3 a, Vec3 b) {
