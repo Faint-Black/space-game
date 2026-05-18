@@ -8,9 +8,9 @@ Premissa:
 - Física.
 
 Integrantes:
-- faltando :: Gabriel.
-- faltando :: Igor.
-- faltando :: Rafael.
+- @gddeazevedo (Gabriel).
+- @igorgiamattey (Igor).
+- @rafacdomin (Rafael).
 
 Responsabilidades:
 - Movimento com inércia.
@@ -40,9 +40,10 @@ Premissa:
 - Asteroides.
 
 Integrantes:
-- @Faint-Black :: Gustavo
-- @pedro-hfw :: Pedro
-- faltando :: Lucas
+- @Faint-Black (Gustavo).
+- @pedro-hfw (Pedro).
+- @lb-rand (Lucas).
+- faltando (Brenno).
 
 Responsabilidades:
 - Geração procedural de asteroides.
@@ -70,10 +71,10 @@ Premissa:
 - Gameplay.
 
 Integrantes:
-- faltando :: Milena
-- faltando :: Vitor
-- faltando :: João
-- @Maique1915 :: Maique
+- @Millenac (Millena).
+- @Vitor5252 (Vitor).
+- @joaosao1000 (João).
+- @Maique1915 (Maique).
 
 Responsabilidades:
 - Detecção de colisões.
@@ -104,15 +105,16 @@ Proibido alterar qualquer um dos seguintes arquivos:
 
 ** Programação
 1. Tudo deve ser escrito em inglês, até comentários.
-2. É imperativo que todo commit passe pelo processo de compilação sem erros,
+2. É imperativo que todo commit passe pelo processo de verificação sem erros,
    antes de ser empurrado para o remoto.
 
 * CONSTRUÇÃO
 Processo de compilação do projeto.
 
 ** Pré-Requisitos
+*OpenGL* e *SDL2* podem ser instalados normalmente por qualquer package manager.
 #+BEGIN_SRC shell
-sudo apt install libopengl-dev libglew-dev libglut-dev
+sudo apt install libopengl-dev libsdl2-dev
 #+END_SRC
 
 ** Compilação
@@ -120,7 +122,12 @@ sudo apt install libopengl-dev libglew-dev libglut-dev
 make -j4
 #+END_SRC
 
+** Verificação
+#+BEGIN_SRC shell
+make check
+#+END_SRC
+
 ** Execução
 #+BEGIN_SRC shell
-./space-game
+make run -j4
 #+END_SRC

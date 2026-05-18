@@ -3,3 +3,4 @@ space-game
 TAGS
 .vscode
 compile_commands.json
+.cache
