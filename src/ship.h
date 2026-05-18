@@ -38,6 +38,8 @@ typedef struct Ship {
     /* Mechanical arm */
     float armAngle;
     float clawAngle;
+    float armYaw;
+    float armPitch;
     int armExtended;
 
     /* Thrusters */
@@ -69,26 +71,26 @@ typedef struct Ship {
 /**
  * @brief Initializes the ship state and loads the OBJ model.
  */
-extern void initShip(void);
+extern void initShip();
 
 /**
  * @brief Frees ship resources.
  */
-extern void deinitShip(void);
+extern void deinitShip();
 
 /**
  * @brief Fetches from global-state the world position of the ship entity.
  *
  * @return Ship's position.
  */
-extern Vec3 getShipPosition(void);
+extern Vec3 getShipPosition();
 
 /**
  * @brief Fetches from global-state the direction unit vector of the ship entity.
  *
  * @return Ship's direction vector.
  */
-extern Vec3 getShipForward(void);
+extern Vec3 getShipForward();
 
 /**
  * @brief Advances the ship's state for 1 frame.
@@ -110,22 +112,22 @@ extern void shipKeyUp(int key);
 /**
  * @brief Fires a projectile from the ship.
  */
-extern void shipFireProjectile(void);
+extern void shipFireProjectile();
 
 /**
  * @brief Toggles the mechanical arm extension.
  */
-extern void shipToggleArm(void);
+extern void shipToggleArm();
 
 /**
  * @brief Toggles the camera between 1st and 3rd person.
  */
-extern void shipToggleCamera(void);
+extern void shipToggleCamera();
 
 /**
  * @brief Toggles scanner visibility.
  */
-extern void shipToggleScanner(void);
+extern void shipToggleScanner();
 
 /**
  * @brief Handles mouse motion for camera orbit.
@@ -143,12 +145,12 @@ extern void shipSetupCamera(int windowW, int windowH);
 /**
  * @brief Renders the ship model, arm, and projectiles.
  */
-extern void renderShip(void);
+extern void renderShip();
 
 /**
  * @brief Renders the scanner cone visualization.
  */
-extern void renderScanner(void);
+extern void renderScanner();
 
 /**
  * @brief Tests if a point is within the scanner cone.

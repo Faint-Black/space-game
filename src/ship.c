@@ -25,11 +25,11 @@ static int keys[512];
 /*  Interface functions                                                       */
 /* ======================================================================== */
 
-extern Vec3 getShipPosition(void) {
+extern Vec3 getShipPosition() {
     return global_ship.position;
 }
 
-extern Vec3 getShipForward(void) {
+extern Vec3 getShipForward() {
     return global_ship.forward;
 }
 
@@ -37,7 +37,7 @@ extern Vec3 getShipForward(void) {
 /*  Initialization / Deinitialization                                         */
 /* ======================================================================== */
 
-extern void initShip(void) {
+extern void initShip() {
     int i;
 
     memset(&global_ship, 0, sizeof(Ship));
@@ -62,6 +62,8 @@ extern void initShip(void) {
 
     global_ship.armAngle = 0.0F;
     global_ship.clawAngle = 30.0F;
+    global_ship.armYaw = 0.0F;
+    global_ship.armPitch = 0.0F;
     global_ship.armExtended = 0;
 
     global_ship.thrusterAngle[0] = 0.0F;
@@ -91,7 +93,7 @@ extern void initShip(void) {
     }
 }
 
-extern void deinitShip(void) {
+extern void deinitShip() {
     if (global_ship.model != NULL) {
         freeOBJModel(global_ship.model);
         global_ship.model = NULL;
@@ -114,7 +116,7 @@ extern void shipKeyUp(int key) {
     }
 }
 
-extern void shipFireProjectile(void) {
+extern void shipFireProjectile() {
     int i;
     for (i = 0; i < MAX_PROJECTILES; i++) {
         if (!global_ship.projectiles[i].active) {
@@ -129,22 +131,24 @@ extern void shipFireProjectile(void) {
     }
 }
 
-extern void shipToggleArm(void) {
+extern void shipToggleArm() {
     global_ship.armExtended = !global_ship.armExtended;
 }
 
-extern void shipToggleCamera(void) {
+extern void shipToggleCamera() {
     global_ship.cameraMode = !global_ship.cameraMode;
 }
 
-extern void shipToggleScanner(void) {
+extern void shipToggleScanner() {
     global_ship.scannerVisible = !global_ship.scannerVisible;
 }
 
 extern void shipMouseMotion(int dx, int dy) {
-    float sensitivity = 0.005F;
-    global_ship.cameraYaw -= (float)dx * sensitivity;
-    global_ship.cameraPitch += (float)dy * sensitivity;
+    float camSens = 0.005F;
+
+    /* Rotate camera orbit */
+    global_ship.cameraYaw -= (float)dx * camSens;
+    global_ship.cameraPitch += (float)dy * camSens;
     if (global_ship.cameraPitch < -1.2F) global_ship.cameraPitch = -1.2F;
     if (global_ship.cameraPitch > 1.2F) global_ship.cameraPitch = 1.2F;
 }
@@ -153,7 +157,7 @@ extern void shipMouseMotion(int dx, int dy) {
 /*  Orientation update from Euler angles (YXZ order)                         */
 /* ======================================================================== */
 
-static void updateOrientation(void) {
+static void updateOrientation() {
     float cp = (float)cos((double)global_ship.pitch);
     float sp = (float)sin((double)global_ship.pitch);
     float cy = (float)cos((double)global_ship.yaw);
@@ -203,8 +207,8 @@ extern void updateShip(float dt) {
     if (keys[SDL_SCANCODE_J]) rollInput -= 1.0F;
     if (keys[SDL_SCANCODE_L]) rollInput += 1.0F;
 
-    if (keys[SDL_SCANCODE_UP])    pitchInput -= 1.0F;
-    if (keys[SDL_SCANCODE_DOWN])  pitchInput += 1.0F;
+    if (keys[SDL_SCANCODE_UP])    pitchInput += 1.0F;
+    if (keys[SDL_SCANCODE_DOWN])  pitchInput -= 1.0F;
     if (keys[SDL_SCANCODE_LEFT])  yawInput += 1.0F;
     if (keys[SDL_SCANCODE_RIGHT]) yawInput -= 1.0F;
 
@@ -447,8 +451,10 @@ static void drawMechanicalArm(float armAng, float clawAng) {
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, armColor);
 
-    /* Shoulder */
-    glTranslatef(0.0F, -0.3F, -1.5F);
+    /* Shoulder at front of ship (-Z is forward) */
+    glTranslatef(0.0F, -0.5F, -3.0F);
+    glRotatef(global_ship.armYaw, 0, 1, 0);
+    glRotatef(global_ship.armPitch, 1, 0, 0);
     drawSimpleSphere(0.15F, 8, 6);
 
     /* Upper arm rotates at shoulder */
@@ -498,7 +504,7 @@ static void drawMechanicalArm(float armAng, float clawAng) {
 /*  Ship Rendering                                                            */
 /* ======================================================================== */
 
-extern void renderShip(void) {
+extern void renderShip() {
     int i;
     GLfloat projColor[] = {1.0F, 0.9F, 0.2F, 1.0F};
     GLfloat projEmit[] = {0.8F, 0.7F, 0.0F, 1.0F};
@@ -535,11 +541,17 @@ extern void renderShip(void) {
         drawThrusterFlame(global_ship.thrusterGlow);
         glPopMatrix();
 
-        /* Render mechanical arm */
-        drawMechanicalArm(global_ship.armAngle, global_ship.clawAngle);
-
         glPopMatrix();
     }
+
+    /* Mechanical arm (always visible, including 1st person) */
+    glPushMatrix();
+    glTranslatef(global_ship.position.x, global_ship.position.y, global_ship.position.z);
+    glRotatef(global_ship.yaw * 180.0F / (float)M_PI, 0, 1, 0);
+    glRotatef(global_ship.pitch * 180.0F / (float)M_PI, 1, 0, 0);
+    glRotatef(global_ship.roll * 180.0F / (float)M_PI, 0, 0, 1);
+    drawMechanicalArm(global_ship.armAngle, global_ship.clawAngle);
+    glPopMatrix();
 
     /* Render projectiles (always visible) */
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, projColor);
@@ -575,7 +587,7 @@ extern int shipPointInScanner(Vec3 point) {
     return (cosAngle >= (float)cos((double)global_ship.scannerAngle));
 }
 
-extern void renderScanner(void) {
+extern void renderScanner() {
     int i;
     int segments = 16;
     float range = global_ship.scannerRange;
