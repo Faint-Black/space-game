@@ -2,6 +2,20 @@
 #define COLLISION_H
 
 #include "utils.h"
+#include "asteroid.h"
+
+typedef struct{
+    Vec3 min;
+    Vec3 max;
+} AABB;
+
+typedef struct BVHNode {
+    AABB box; 
+    struct BVHNode *left;
+    struct BVHNode *right;
+    const TriangleFace *faces;
+    int face_count;
+} BVHNode;
 
 /**
  * @brief Uses AABB and BVH to check if the ship collided with an asteroid.
