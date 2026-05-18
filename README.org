@@ -71,7 +71,7 @@ Premissa:
 - Gameplay.
 
 Integrantes:
-- @MilenaC (Milena).
+- @Millenac (Millena).
 - @Vitor5252 (Vitor).
 - @joaosao1000 (João).
 - @Maique1915 (Maique).
