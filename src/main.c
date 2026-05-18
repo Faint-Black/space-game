@@ -43,19 +43,20 @@ static void initStars(void) {
 }
 
 static void renderStars(void) {
-    Vec3 shipPos = getShipPosition();
     int i;
     glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
     glPointSize(2.0F);
     glBegin(GL_POINTS);
     for (i = 0; i < NUM_STARS; i++) {
         float b = starBrightness[i];
         glColor3f(b, b, b * 0.95F);
-        glVertex3f(shipPos.x + starPositions[i].x,
-                   shipPos.y + starPositions[i].y,
-                   shipPos.z + starPositions[i].z);
+        glVertex3f(starPositions[i].x,
+                   starPositions[i].y,
+                   starPositions[i].z);
     }
     glEnd();
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
 }
 

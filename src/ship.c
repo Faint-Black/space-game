@@ -57,8 +57,8 @@ extern void initShip(void) {
 
     global_ship.thrustPower = 25.0F;
     global_ship.rotationSpeed = 2.0F;
-    global_ship.dampingLinear = 0.02F;
-    global_ship.dampingAngular = 0.03F;
+    global_ship.dampingLinear = 0.004F;
+    global_ship.dampingAngular = 0.008F;
 
     global_ship.armAngle = 0.0F;
     global_ship.clawAngle = 30.0F;
@@ -497,10 +497,13 @@ extern void renderShip(void) {
         glRotatef(global_ship.pitch * 180.0F / (float)M_PI, 1, 0, 0);
         glRotatef(global_ship.roll * 180.0F / (float)M_PI, 0, 0, 1);
 
-        /* Render OBJ model */
+        /* Render OBJ model (rotate 180 Y so model front faces -Z) */
         if (global_ship.model != NULL) {
+            glPushMatrix();
+            glRotatef(180.0F, 0, 1, 0);
             glColor3f(1.0F, 1.0F, 1.0F);
             renderOBJModel(global_ship.model);
+            glPopMatrix();
         }
 
         /* Render thruster flames */
