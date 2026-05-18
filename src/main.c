@@ -38,7 +38,7 @@ static void initStars(void) {
         float mag = vec3Magnitude(dir);
         if (mag < 0.001F) { dir = vec3(0.0F, 1.0F, 0.0F); mag = 1.0F; }
         starPositions[i] = vec3MulScalar(vec3DivScalar(dir, mag), 500.0F);
-        starBrightness[i] = randfRange(0.3F, 1.0F);
+        starBrightness[i] = randfRange(-1.0F, 1.0F);
     }
 }
 

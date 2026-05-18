@@ -12,18 +12,11 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-/* ======================================================================== */
-/*  Global ship instance                                                     */
-/* ======================================================================== */
 
 static Ship global_ship;
 
 /* Key state arrays */
 static int keys[512];
-
-/* ======================================================================== */
-/*  Interface functions                                                       */
-/* ======================================================================== */
 
 extern Vec3 getShipPosition() {
     return global_ship.position;
@@ -32,10 +25,6 @@ extern Vec3 getShipPosition() {
 extern Vec3 getShipForward() {
     return global_ship.forward;
 }
-
-/* ======================================================================== */
-/*  Initialization / Deinitialization                                         */
-/* ======================================================================== */
 
 extern void initShip() {
     int i;
@@ -100,10 +89,6 @@ extern void deinitShip() {
     }
 }
 
-/* ======================================================================== */
-/*  Input Handling                                                            */
-/* ======================================================================== */
-
 extern void shipKeyDown(int key) {
     if (key >= 0 && key < 512) {
         keys[key] = 1;
@@ -153,10 +138,6 @@ extern void shipMouseMotion(int dx, int dy) {
     if (global_ship.cameraPitch > 1.2F) global_ship.cameraPitch = 1.2F;
 }
 
-/* ======================================================================== */
-/*  Orientation update from Euler angles (YXZ order)                         */
-/* ======================================================================== */
-
 static void updateOrientation() {
     float cp = (float)cos((double)global_ship.pitch);
     float sp = (float)sin((double)global_ship.pitch);
@@ -181,10 +162,6 @@ static void updateOrientation() {
     global_ship.up = vec3Normalize(vec3Cross(global_ship.right, global_ship.forward));
 }
 
-/* ======================================================================== */
-/*  Physics Update                                                            */
-/* ======================================================================== */
-
 extern void updateShip(float dt) {
     float thrustInput = 0.0F;
     float strafeInput = 0.0F;
@@ -204,8 +181,8 @@ extern void updateShip(float dt) {
     if (keys[SDL_SCANCODE_D]) strafeInput += 1.0F;
     if (keys[SDL_SCANCODE_Q]) vertInput += 1.0F;
     if (keys[SDL_SCANCODE_E]) vertInput -= 1.0F;
-    if (keys[SDL_SCANCODE_J]) rollInput -= 1.0F;
-    if (keys[SDL_SCANCODE_L]) rollInput += 1.0F;
+    if (keys[SDL_SCANCODE_J]) rollInput += 1.0F;
+    if (keys[SDL_SCANCODE_L]) rollInput -= 1.0F;
 
     if (keys[SDL_SCANCODE_UP])    pitchInput += 1.0F;
     if (keys[SDL_SCANCODE_DOWN])  pitchInput -= 1.0F;
@@ -290,10 +267,6 @@ extern void updateShip(float dt) {
     }
 }
 
-/* ======================================================================== */
-/*  Camera Setup                                                              */
-/* ======================================================================== */
-
 extern void shipSetupCamera(int windowW, int windowH) {
     float aspect;
     Vec3 camPos, lookAt;
@@ -339,10 +312,6 @@ extern void shipSetupCamera(int windowW, int windowH) {
         (double)lookAt.x, (double)lookAt.y, (double)lookAt.z,
         0.0, 1.0, 0.0);
 }
-
-/* ======================================================================== */
-/*  Simple primitives (replacements for GLUT)                                */
-/* ======================================================================== */
 
 static void drawSimpleCube(float size) {
     float h = size * 0.5F;
@@ -418,10 +387,6 @@ static void drawSimpleCone(float radius, float height, int slices) {
     glEnd();
 }
 
-/* ======================================================================== */
-/*  Thruster flame effect                                                     */
-/* ======================================================================== */
-
 static void drawThrusterFlame(float glow) {
     GLfloat flameColor[4];
     if (glow < 0.01F) return;
@@ -439,10 +404,6 @@ static void drawThrusterFlame(float glow) {
     flameColor[3] = 1.0F;
     glMaterialfv(GL_FRONT, GL_EMISSION, flameColor);
 }
-
-/* ======================================================================== */
-/*  Mechanical Arm Rendering                                                  */
-/* ======================================================================== */
 
 static void drawMechanicalArm(float armAng, float clawAng) {
     GLfloat armColor[] = {0.5F, 0.5F, 0.55F, 1.0F};
@@ -499,10 +460,6 @@ static void drawMechanicalArm(float armAng, float clawAng) {
 
     glPopMatrix();
 }
-
-/* ======================================================================== */
-/*  Ship Rendering                                                            */
-/* ======================================================================== */
 
 extern void renderShip() {
     int i;
@@ -569,10 +526,6 @@ extern void renderShip() {
     }
     glMaterialfv(GL_FRONT, GL_EMISSION, noEmit);
 }
-
-/* ======================================================================== */
-/*  Scanner                                                                   */
-/* ======================================================================== */
 
 extern int shipPointInScanner(Vec3 point) {
     Vec3 toPoint = vec3SubVector(point, global_ship.position);

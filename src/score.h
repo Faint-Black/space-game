@@ -3,7 +3,6 @@
 
 typedef struct {
     int points;
-    int lives;
     int asteroidsDestroyed;
     int modulesCollected;
 } Score;
@@ -14,11 +13,8 @@ void scoreInit(Score* s);
 /* Eventos que alteram a pontuação. */
 void scoreAddAsteroidDestroyed(Score* s);
 void scoreAddModuleCollected(Score* s);
-void scoreLoseLife(Score* s);
 
 /* Consultas. */
 int scoreGetPoints(const Score* s);
-int scoreGetLives(const Score* s);
-int scoreIsGameOver(const Score* s);
 
 #endif /* SCORE_H */

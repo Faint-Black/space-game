@@ -4,8 +4,8 @@
 #include "utils.h"
 #include "objloader.h"
 
-#define MAX_PROJECTILES 50
-#define PROJECTILE_SPEED 80.0F
+#define MAX_PROJECTILES     50
+#define PROJECTILE_SPEED    80.0F
 #define PROJECTILE_LIFETIME 3.0F
 
 typedef struct Projectile {
