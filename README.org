@@ -114,7 +114,7 @@ Processo de compilação do projeto.
 ** Pré-Requisitos
 *OpenGL* e *SDL2* podem ser instalados normalmente por qualquer package manager.
 #+BEGIN_SRC shell
-sudo apt install libopengl-dev libsdl2-dev
+sudo apt install libopengl-dev libsdl2-dev libsdl2-image-dev
 #+END_SRC
 
 ** Compilação
