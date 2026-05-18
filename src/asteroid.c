@@ -1,6 +1,7 @@
 #include "asteroid.h"
 #include "render.h"
 #include "utils.h"
+#include <GL/gl.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 /* internal global variables */
 static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
+static GLuint asteroid_texture_id = 0;
 
 static Vec3 polarVec3(float theta, float phi) {
     Vec3 result;
@@ -131,6 +133,7 @@ static Asteroid initAsteroid(void) {
     result.position = vec3Null();
     result.velocity = vec3(10.0F, 0.0F, 0.0F);
     result.mesh = resolveMiscMeshData(generateSphereMesh(20, 20));
+    result.texture_id = asteroid_texture_id;
     return result;
 }
 
@@ -143,6 +146,7 @@ static void deinitAsteroid(Asteroid asteroid) {
 
 extern void initAsteroids(int max_asteroid_count) {
     int i;
+    asteroid_texture_id = loadTexture("./data/asteroid-texture.jpg");
     asteroid_count = max_asteroid_count;
     asteroid_array = (Asteroid*)malloc(asteroid_count * sizeof(Asteroid));
     for (i = 0; i < asteroid_count; i++) {

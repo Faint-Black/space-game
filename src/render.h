@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "utils.h"
+#include <GL/gl.h>
 
 typedef struct Vertex {
     Vec3 position;
@@ -18,6 +19,11 @@ typedef struct Mesh {
     TriangleFace* faces;
     int face_count;
 } Mesh;
+
+/**
+ * @brief Loads an OpenGL texture through an image.
+ */
+extern GLuint loadTexture(const char* filepath);
 
 /**
  * @brief Tells OpenGL to render in bulk the data of a mesh.

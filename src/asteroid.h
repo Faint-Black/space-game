@@ -3,10 +3,12 @@
 
 #include "render.h"
 #include "utils.h"
+#include <GL/gl.h>
 
 typedef struct Asteroid {
     /* Graphical Vertex data */
     Mesh mesh;
+    GLuint texture_id;
     /* Gameplay data */
     float mass;
     Vec3 position;
@@ -15,6 +17,7 @@ typedef struct Asteroid {
 
 /**
  * @brief Initializes internal state of asteroids. Must be called once before game begins.
+ *        This also loads the asteroid texture into OpenGL.
  */
 extern void initAsteroids(int max_asteroid_count);
 

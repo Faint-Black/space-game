@@ -90,10 +90,10 @@ extern void gameRenderFrame(const GameState* game) {
     shipSetupCamera(w, h);
     /* Scene lighting */
     setupLighting();
-    /* Render asteroids */
-    renderAsteroids();
     /* Stars (camera-relative background) */
     renderStars();
+    /* Render asteroids */
+    renderAsteroids();
     /* Render ship + projectiles */
     renderShip();
     /* Render scanner overlay */

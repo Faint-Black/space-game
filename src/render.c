@@ -3,6 +3,36 @@
 #include "stars.h"
 #include "utils.h"
 #include <GL/gl.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+extern GLuint loadTexture(const char* filepath) {
+    SDL_Surface* surface = IMG_Load(filepath);
+    GLenum format;
+    GLuint texture_id;
+
+    if (!surface) {
+        SDL_Log("ERROR: IMG_Load failed: %s", IMG_GetError());
+        return 0;
+    }
+
+    format = (surface->format->BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
+
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    SDL_FreeSurface(surface);
+
+    return texture_id;
+}
 
 extern void renderMesh(Mesh mesh) {
     int v_index;
@@ -47,7 +77,10 @@ extern void renderAsteroids(void) {
         glPushMatrix();
         {
             glTranslatef(asteroid.position.x, asteroid.position.y, asteroid.position.z);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, asteroid.texture_id);
             renderMesh(asteroid.mesh);
+            glDisable(GL_TEXTURE_2D);
         }
         glPopMatrix();
     }
