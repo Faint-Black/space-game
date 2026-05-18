@@ -29,7 +29,6 @@ extern Vec3 getShipForward() {
 extern void initShip() {
     int i;
 
-    memset(&global_ship, 0, sizeof(Ship));
     memset(keys, 0, sizeof(keys));
 
     global_ship.position = vec3(0.0F, 0.0F, 0.0F);
