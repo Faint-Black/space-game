@@ -91,12 +91,21 @@ extern void initShip() {
     if (global_ship.model == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load ship model!");
     }
+
+    global_ship.armModel = loadOBJModel("data/ship/mech_arm.obj");
+    if (global_ship.armModel == NULL) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load arm model!");
+    }
 }
 
 extern void deinitShip() {
     if (global_ship.model != NULL) {
         freeOBJModel(global_ship.model);
         global_ship.model = NULL;
+    }
+    if (global_ship.armModel != NULL) {
+        freeOBJModel(global_ship.armModel);
+        global_ship.armModel = NULL;
     }
 }
 
@@ -337,48 +346,6 @@ extern void shipSetupCamera(int windowW, int windowH) {
 /*  Simple primitives (replacements for GLUT)                                */
 /* ======================================================================== */
 
-static void drawSimpleCube(float size) {
-    float h = size * 0.5F;
-    glBegin(GL_QUADS);
-    /* Front */
-    glNormal3f(0, 0, 1);
-    glVertex3f(-h, -h, h);
-    glVertex3f(h, -h, h);
-    glVertex3f(h, h, h);
-    glVertex3f(-h, h, h);
-    /* Back */
-    glNormal3f(0, 0, -1);
-    glVertex3f(h, -h, -h);
-    glVertex3f(-h, -h, -h);
-    glVertex3f(-h, h, -h);
-    glVertex3f(h, h, -h);
-    /* Top */
-    glNormal3f(0, 1, 0);
-    glVertex3f(-h, h, h);
-    glVertex3f(h, h, h);
-    glVertex3f(h, h, -h);
-    glVertex3f(-h, h, -h);
-    /* Bottom */
-    glNormal3f(0, -1, 0);
-    glVertex3f(-h, -h, -h);
-    glVertex3f(h, -h, -h);
-    glVertex3f(h, -h, h);
-    glVertex3f(-h, -h, h);
-    /* Right */
-    glNormal3f(1, 0, 0);
-    glVertex3f(h, -h, h);
-    glVertex3f(h, -h, -h);
-    glVertex3f(h, h, -h);
-    glVertex3f(h, h, h);
-    /* Left */
-    glNormal3f(-1, 0, 0);
-    glVertex3f(-h, -h, -h);
-    glVertex3f(-h, -h, h);
-    glVertex3f(-h, h, h);
-    glVertex3f(-h, h, -h);
-    glEnd();
-}
-
 static void drawSimpleSphere(float radius, int slices, int stacks) {
     int i, j;
     for (i = 0; i < stacks; i++) {
@@ -446,66 +413,6 @@ static void drawThrusterFlame(float glow) {
 }
 
 /* ======================================================================== */
-/*  Mechanical Arm Rendering                                                  */
-/* ======================================================================== */
-
-static void drawMechanicalArm(float armAng, float clawAng) {
-    GLfloat armColor[] = {0.5F, 0.5F, 0.55F, 1.0F};
-    GLfloat clawColor[] = {0.7F, 0.3F, 0.1F, 1.0F};
-
-    glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, armColor);
-
-    /* Shoulder at front of ship (-Z is forward) */
-    glTranslatef(0.0F, -0.5F, -3.0F);
-    glRotatef(global_ship.armYaw, 0, 1, 0);
-    glRotatef(global_ship.armPitch, 1, 0, 0);
-    drawSimpleSphere(0.15F, 8, 6);
-
-    /* Upper arm rotates at shoulder */
-    glRotatef(armAng, 1, 0, 0);
-    glTranslatef(0.0F, -0.5F, 0.0F);
-    glPushMatrix();
-    glScalef(0.1F, 0.5F, 0.1F);
-    drawSimpleCube(1.0F);
-    glPopMatrix();
-
-    /* Elbow */
-    glTranslatef(0.0F, -0.5F, 0.0F);
-    drawSimpleSphere(0.12F, 8, 6);
-
-    /* Forearm */
-    glRotatef(armAng * 0.5F, 1, 0, 0);
-    glTranslatef(0.0F, -0.4F, 0.0F);
-    glPushMatrix();
-    glScalef(0.08F, 0.4F, 0.08F);
-    drawSimpleCube(1.0F);
-    glPopMatrix();
-
-    /* Claw base */
-    glTranslatef(0.0F, -0.4F, 0.0F);
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, clawColor);
-
-    /* Left finger */
-    glPushMatrix();
-    glRotatef(-clawAng, 0, 0, 1);
-    glTranslatef(-0.1F, -0.2F, 0.0F);
-    glScalef(0.05F, 0.2F, 0.05F);
-    drawSimpleCube(1.0F);
-    glPopMatrix();
-
-    /* Right finger */
-    glPushMatrix();
-    glRotatef(clawAng, 0, 0, 1);
-    glTranslatef(0.1F, -0.2F, 0.0F);
-    glScalef(0.05F, 0.2F, 0.05F);
-    drawSimpleCube(1.0F);
-    glPopMatrix();
-
-    glPopMatrix();
-}
-
-/* ======================================================================== */
 /*  Ship Rendering                                                            */
 /* ======================================================================== */
 
@@ -549,14 +456,23 @@ extern void renderShip() {
         glPopMatrix();
     }
 
-    /* Mechanical arm (always visible, including 1st person) */
-    glPushMatrix();
-    glTranslatef(global_ship.position.x, global_ship.position.y, global_ship.position.z);
-    glRotatef(global_ship.yaw * 180.0F / (float)M_PI, 0, 1, 0);
-    glRotatef(global_ship.pitch * 180.0F / (float)M_PI, 1, 0, 0);
-    glRotatef(global_ship.roll * 180.0F / (float)M_PI, 0, 0, 1);
-    drawMechanicalArm(global_ship.armAngle, global_ship.clawAngle);
-    glPopMatrix();
+    /* Mechanical arm: only render when extended */
+    if (global_ship.armExtended && global_ship.armModel != NULL) {
+        glPushMatrix();
+        glTranslatef(global_ship.position.x, global_ship.position.y, global_ship.position.z);
+        glRotatef(global_ship.yaw * 180.0F / (float)M_PI, 0, 1, 0);
+        glRotatef(global_ship.pitch * 180.0F / (float)M_PI, 1, 0, 0);
+        glRotatef(global_ship.roll * 180.0F / (float)M_PI, 0, 0, 1);
+        /* Shoulder offset: front-bottom of ship, matching old procedural arm */
+        glTranslatef(0.0F, -1.8F, -3.0F);
+        glScalef(0.75F, 0.75F, 0.75F);
+		glRotatef(90.0F, 0, 1, 0);
+		glRotatef(global_ship.armYaw, 0, 1, 0);
+        glRotatef(global_ship.armPitch, 1, 0, 0);
+        glColor3f(1.0F, 1.0F, 1.0F);
+        renderOBJModel(global_ship.armModel);
+        glPopMatrix();
+    }
 
     /* Render projectiles (always visible) */
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, projColor);

@@ -62,8 +62,9 @@ typedef struct Ship {
     /* Projectiles */
     Projectile projectiles[MAX_PROJECTILES];
 
-    /* Model */
+    /* Models */
     OBJModel* model;
+    OBJModel* armModel;
 
     /* State */
     int thrusting;
