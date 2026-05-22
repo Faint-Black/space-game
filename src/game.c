@@ -6,6 +6,7 @@
 #include "score.h"
 #include "ship.h"
 #include "stars.h"
+#include "utils.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
@@ -95,6 +96,10 @@ extern void gameRenderFrame(const GameState* game) {
     renderStars();
     /* Render asteroids */
     renderAsteroids();
+    /* Render the barycenter points of each asteroid */
+    if (DEBUG_MODE) {
+        debugRenderAsteroidBarycenters();
+    }
     /* Render ship + projectiles */
     renderShip();
     /* Render scanner overlay */
