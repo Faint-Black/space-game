@@ -47,12 +47,13 @@ static int splitIndicesBVH(const Vec3* points, int* indices, int num_indices, in
     int j = num_indices - 1;
     while (i <= j) {
         float val = 0.0F;
-        if (axis == 0)
+        if (axis == 0) {
             val = points[indices[i]].x;
-        else if (axis == 1)
+        } else if (axis == 1) {
             val = points[indices[i]].y;
-        else
+        } else {
             val = points[indices[i]].z;
+        }
 
         if (val <= split_pos) {
             i++;
@@ -112,10 +113,11 @@ extern BVHNode* bvhBuild(const Vec3* points, int* indices, int num_indices, int 
     /* Find the longest axis to split the space (Axis X=0, Y=1, Z=2) */
     extent = vec3SubVector(node->aabb.max, node->aabb.min);
     axis = 0;
-    if (extent.y > extent.x && extent.y > extent.z)
+    if (extent.y > extent.x && extent.y > extent.z) {
         axis = 1;
-    else if (extent.z > extent.x && extent.z > extent.y)
+    } else if (extent.z > extent.x && extent.z > extent.y) {
         axis = 2;
+    }
 
     split_pos = 0.0F;
     if (axis == 0) {

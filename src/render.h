@@ -40,4 +40,14 @@ extern void renderStars(void);
  */
 extern void renderAsteroids(void);
 
+/**
+ * @brief (For debug use only) Renders an array of points as red dots.
+ */
+extern void debugRenderPoints(Vec3* points, int count);
+
+/**
+ * @brief (For debug use only) Renders the barycenters of the asteroids.
+ */
+extern void debugRenderAsteroidBarycenters(void);
+
 #endif /* RENDER_H */

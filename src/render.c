@@ -85,3 +85,24 @@ extern void renderAsteroids(void) {
         glPopMatrix();
     }
 }
+
+extern void debugRenderPoints(Vec3* points, int count) {
+    const Vec3 color = vec3(1.0, 0.0, 0.0);
+    int i;
+
+    glBegin(GL_POINTS);
+    for (i = 0; i < count; i++) {
+        const Vec3 pos = points[i];
+        glColor3f(color.x, color.y, color.z);
+        glVertex3f(pos.x, pos.y, pos.z);
+    }
+    glEnd();
+}
+
+extern void debugRenderAsteroidBarycenters(void) {
+    int i;
+    for (i = 0; i < getAsteroidCount(); i++) {
+        const Asteroid asteroid = getAsteroids()[i];
+        debugRenderPoints(asteroid.barycenter_array, asteroid.barycenter_count);
+    }
+}
