@@ -71,6 +71,7 @@ extern void gameUpdateLogic(GameState* game) {
     if (dt > 0.05F) dt = 0.05F;
 
     updateShip(dt);
+    updateAsteroids(dt);
 
     if (checkCollision(getShipPosition())) {
         scoreLoseLife();

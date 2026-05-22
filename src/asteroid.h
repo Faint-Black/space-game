@@ -30,6 +30,11 @@ extern void initAsteroids(int max_asteroid_count);
 extern void deinitAsteroids(void);
 
 /**
+ * @brief Updates all the asteroids. Must be called before the frame is rendered.
+ */
+extern void updateAsteroids(float dt);
+
+/**
  * @brief Fetches from global-state the constant reference to the asteroid entity array.
  *
  * @return Asteroid array.

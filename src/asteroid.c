@@ -6,6 +6,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#define MAX_ASTEROID_DISTRIBUTION_RADIUS 100.0F
+#define MAX_ASTEROID_VELOCITY 5.0F
+
 /* internal global variables */
 static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
@@ -146,13 +149,17 @@ static Vec3* generateBarycenters(Mesh mesh, Vec3 initial_pos) {
 
 static Asteroid initAsteroid(void) {
     Asteroid result;
+
     result.mass = 1.0F;
-    result.position = vec3Null();
-    result.velocity = vec3(10.0F, 0.0F, 0.0F);
+    result.position = vec3MulScalar(vec3Random(), MAX_ASTEROID_DISTRIBUTION_RADIUS);
+    result.velocity = vec3MulScalar(vec3Random(), MAX_ASTEROID_VELOCITY);
+
     result.mesh = resolveMiscMeshData(generateSphereMesh(20, 20));
     result.texture_id = asteroid_texture_id;
+
     result.barycenter_array = generateBarycenters(result.mesh, result.position);
     result.barycenter_count = result.mesh.face_count;
+
     return result;
 }
 
@@ -163,6 +170,23 @@ static void deinitAsteroid(Asteroid asteroid) {
     }
     if (asteroid.barycenter_array != NULL) {
         free(asteroid.barycenter_array);
+    }
+}
+
+static void updateAsteroid(Asteroid* asteroid, float dt) {
+    int i;
+    const Vec3 vel = vec3MulScalar(asteroid->velocity, dt);
+
+    asteroid->position = vec3AddVector(asteroid->position, vel);
+    for (i = 0; i < asteroid->barycenter_count; i++) {
+        asteroid->barycenter_array[i] = vec3AddVector(asteroid->barycenter_array[i], vel);
+    }
+}
+
+extern void updateAsteroids(float dt) {
+    int i;
+    for (i = 0; i < asteroid_count; i++) {
+        updateAsteroid(&asteroid_array[i], dt);
     }
 }
 
