@@ -16,6 +16,14 @@ extern float randRangedFloat(float min, float max) {
     return min + randNormalizedFloat() * (max - min);
 }
 
+extern float maxFloat(float a, float b) {
+    return (a > b) ? a : b;
+}
+
+extern float minFloat(float a, float b) {
+    return (a < b) ? a : b;
+}
+
 extern Vec3 vec3(float x, float y, float z) {
     Vec3 result;
     result.x = x;

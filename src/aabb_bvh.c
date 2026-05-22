@@ -29,13 +29,15 @@ extern AABB aabbComputeFromPoints(const Vec3* points, int count) {
 
 extern AABB aabbMerge(AABB a, AABB b) {
     AABB result;
-    result.min.x = (a.min.x < b.min.x) ? a.min.x : b.min.x;
-    result.min.y = (a.min.y < b.min.y) ? a.min.y : b.min.y;
-    result.min.z = (a.min.z < b.min.z) ? a.min.z : b.min.z;
 
-    result.max.x = (a.max.x > b.max.x) ? a.max.x : b.max.x;
-    result.max.y = (a.max.y > b.max.y) ? a.max.y : b.max.y;
-    result.max.z = (a.max.z > b.max.z) ? a.max.z : b.max.z;
+    result.min.x = minFloat(a.min.x, b.min.x);
+    result.min.y = minFloat(a.min.y, b.min.y);
+    result.min.z = minFloat(a.min.z, b.min.z);
+
+    result.max.x = maxFloat(a.max.x, b.max.x);
+    result.max.y = maxFloat(a.max.y, b.max.y);
+    result.max.z = maxFloat(a.max.z, b.max.z);
+
     return result;
 }
 

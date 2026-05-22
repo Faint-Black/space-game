@@ -31,6 +31,20 @@ extern float randCenteredFloat(void);
 extern float randRangedFloat(float min, float max);
 
 /**
+ * @brief Returns the largest float (ANSI C does not have this defined in math.h).
+ *
+ * @return max(a, b)
+ */
+extern float maxFloat(float a, float b);
+
+/**
+ * @brief Returns the smallest float (ANSI C does not have this defined in math.h).
+ *
+ * @return min(a, b)
+ */
+extern float minFloat(float a, float b);
+
+/**
  * @brief Creates a new vector from individual components.
  *
  * @return Vector(x, y, z)
