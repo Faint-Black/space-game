@@ -127,6 +127,23 @@ static Mesh resolveMiscMeshData(Mesh mesh) {
     return mesh;
 }
 
+static Vec3* generateBarycenters(Mesh mesh, Vec3 initial_pos) {
+    /* each triangular face has its own barycenter */
+    Vec3* points = malloc(mesh.face_count * sizeof(Vec3));
+
+    int i;
+    for (i = 0; i < mesh.face_count; i++) {
+        const Vec3 v1 = mesh.faces[i].v[0].position;
+        const Vec3 v2 = mesh.faces[i].v[1].position;
+        const Vec3 v3 = mesh.faces[i].v[2].position;
+        const Vec3 model_coord = vec3BarycenterTri(v1, v2, v3);
+        const Vec3 world_coord = vec3AddVector(model_coord, initial_pos);
+        points[i] = world_coord;
+    }
+
+    return points;
+}
+
 static Asteroid initAsteroid(void) {
     Asteroid result;
     result.mass = 1.0F;
@@ -134,6 +151,8 @@ static Asteroid initAsteroid(void) {
     result.velocity = vec3(10.0F, 0.0F, 0.0F);
     result.mesh = resolveMiscMeshData(generateSphereMesh(20, 20));
     result.texture_id = asteroid_texture_id;
+    result.barycenter_array = generateBarycenters(result.mesh, result.position);
+    result.barycenter_count = result.mesh.face_count;
     return result;
 }
 
@@ -141,6 +160,9 @@ static Asteroid initAsteroid(void) {
 static void deinitAsteroid(Asteroid asteroid) {
     if (asteroid.mesh.faces != NULL) {
         free(asteroid.mesh.faces);
+    }
+    if (asteroid.barycenter_array != NULL) {
+        free(asteroid.barycenter_array);
     }
 }
 
@@ -171,24 +193,4 @@ extern const Asteroid* getAsteroids(void) {
 
 extern int getAsteroidCount(void) {
     return asteroid_count;
-}
-
-extern Vec3* asteroidGenerateWorldPoints(const Asteroid* asteroid, int* out_count) {
-    int i;
-    Vec3* points = (Vec3*)malloc(asteroid->mesh.face_count * sizeof(Vec3));
-    
-    for (i = 0; i < asteroid->mesh.face_count; i++) {
-        /* Calculates the center of the isolated triangle in local coordinates */
-        Vec3 local_barycenter = vec3BarycenterTri(
-            asteroid->mesh.faces[i].v[0].position,
-            asteroid->mesh.faces[i].v[1].position,
-            asteroid->mesh.faces[i].v[2].position
-        );
-        
-        /* Converts to world coordinates by adding the asteroid's position and stores it in the array */
-        points[i] = vec3AddVector(local_barycenter, asteroid->position);
-    }
-    
-    *out_count = asteroid->mesh.face_count;
-    return points;
 }
