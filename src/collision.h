@@ -5,27 +5,7 @@
 #include "render.h"
 #include "utils.h"
 
-/**
- * @brief Axis-Aligned Bounding Box, the building block for BVH leaves and
- *        broad-phase collision queries.
- */
-typedef struct {
-    Vec3 min;
-    Vec3 max;
-} AABB;
-
-/**
- * @brief Bounding Volume Hierarchy node. Internal nodes carry only the box
- *        and child pointers; leaves additionally reference the triangle range
- *        they cover.
- */
-typedef struct BVHNode {
-    AABB box;
-    struct BVHNode* left;
-    struct BVHNode* right;
-    const TriangleFace* faces;
-    int face_count;
-} BVHNode;
+/* AABB and BVHNode are defined in utils.h */
 
 /**
  * @brief Computes the world-space AABB that bounds every vertex of the given

@@ -17,7 +17,7 @@ typedef struct Asteroid {
 
 /**
  * @brief Initializes internal state of asteroids. Must be called once before game begins.
- *        This also loads the asteroid texture into OpenGL.
+ * This also loads the asteroid texture into OpenGL.
  */
 extern void initAsteroids(int max_asteroid_count);
 
@@ -39,5 +39,14 @@ extern const Asteroid* getAsteroids(void);
  * @return Asteroid array length.
  */
 extern int getAsteroidCount(void);
+
+/**
+ * @brief Generates a list of world points (based on the barycenter of each mesh face).
+ * Note: Remember to 'free()' the returned pointer after use.
+ * @param asteroid Pointer to the asteroid in question.
+ * @param out_count Output variable that will receive the amount of generated points.
+ * @return Pointer containing the array of world positions of the triangles.
+ */
+extern Vec3* asteroidGenerateWorldPoints(const Asteroid* asteroid, int* out_count);
 
 #endif /* ASTEROID_H */

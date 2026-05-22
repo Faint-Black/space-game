@@ -172,3 +172,23 @@ extern const Asteroid* getAsteroids(void) {
 extern int getAsteroidCount(void) {
     return asteroid_count;
 }
+
+extern Vec3* asteroidGenerateWorldPoints(const Asteroid* asteroid, int* out_count) {
+    int i;
+    Vec3* points = (Vec3*)malloc(asteroid->mesh.face_count * sizeof(Vec3));
+    
+    for (i = 0; i < asteroid->mesh.face_count; i++) {
+        /* Calculates the center of the isolated triangle in local coordinates */
+        Vec3 local_barycenter = vec3BarycenterTri(
+            asteroid->mesh.faces[i].v[0].position,
+            asteroid->mesh.faces[i].v[1].position,
+            asteroid->mesh.faces[i].v[2].position
+        );
+        
+        /* Converts to world coordinates by adding the asteroid's position and stores it in the array */
+        points[i] = vec3AddVector(local_barycenter, asteroid->position);
+    }
+    
+    *out_count = asteroid->mesh.face_count;
+    return points;
+}
