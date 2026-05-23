@@ -96,9 +96,8 @@ extern void gameRenderFrame(const GameState* game) {
     renderStars();
     /* Render asteroids */
     renderAsteroids();
-    /* Render the barycenter points of each asteroid */
     if (DEBUG_MODE) {
-        debugRenderAsteroidBVHs();
+        debugRenderAsteroidLeafBVHs();
     }
     /* Render ship + projectiles */
     renderShip();

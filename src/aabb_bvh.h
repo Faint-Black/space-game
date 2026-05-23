@@ -52,15 +52,8 @@ extern void bvhFree(BVHNode* root);
 extern void bvhRefit(BVHNode* node, const Vec3* current_points);
 
 /**
- * @brief Computes the world-space AABB that bounds every vertex of the given
- *        triangle mesh.
- *
- * @param faces Pointer to a contiguous triangle array.
- * @param count Number of triangles in the array.
- *
- * @return The tight AABB enclosing every vertex, or a null box if the input
- *         is empty.
+ * @brief Helper that checks if a given node is a leaf or not
  */
-extern AABB computeAABBFromFaces(const TriangleFace* faces, int count);
+extern int bvhNodeIsLeaf(const BVHNode* node);
 
 #endif /* AABB_BVH_H */

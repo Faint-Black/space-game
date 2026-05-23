@@ -164,3 +164,22 @@ extern void debugRenderAsteroidBVHs(void) {
         debugRenderBVH(asteroid.bvh, 0);
     }
 }
+
+static void debugRenderLeafBVH(BVHNode* node) {
+    const Vec3 red = vec3(1, 0, 0);
+    if (node == NULL) return;
+
+    if (bvhNodeIsLeaf(node)) {
+        debugRenderAABB(node->aabb, red);
+    }
+    if (node->left != NULL) debugRenderLeafBVH(node->left);
+    if (node->right != NULL) debugRenderLeafBVH(node->right);
+}
+
+extern void debugRenderAsteroidLeafBVHs(void) {
+    int i;
+    for (i = 0; i < getAsteroidCount(); i++) {
+        const Asteroid asteroid = getAsteroids()[i];
+        debugRenderLeafBVH(asteroid.bvh);
+    }
+}

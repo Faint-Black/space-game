@@ -55,4 +55,9 @@ extern void debugRenderAsteroidBarycenters(void);
  */
 extern void debugRenderAsteroidBVHs(void);
 
+/**
+ * @brief (For debug use only) Renders the BVH of the asteroids. Only the leaf nodes.
+ */
+extern void debugRenderAsteroidLeafBVHs(void);
+
 #endif /* RENDER_H */

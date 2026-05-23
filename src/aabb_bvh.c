@@ -189,58 +189,32 @@ extern void bvhFree(BVHNode* node) {
     }
 }
 
-/**
- * @brief Expands the bounding box limits to include the given point.
- */
-static void aabbExpandPoint(AABB* box, Vec3 p) {
-    if (p.x < box->min.x) box->min.x = p.x;
-    if (p.y < box->min.y) box->min.y = p.y;
-    if (p.z < box->min.z) box->min.z = p.z;
-    if (p.x > box->max.x) box->max.x = p.x;
-    if (p.y > box->max.y) box->max.y = p.y;
-    if (p.z > box->max.z) box->max.z = p.z;
+extern int bvhNodeIsLeaf(const BVHNode* node) {
+    return (node->left == NULL && node->right == NULL);
 }
 
 /**
- * @brief Computes the AABB that bounds a single triangle face.
+ * @brief Expands the bounding box limits to include the given point.
  */
-static AABB aabbFromFace(const TriangleFace* f) {
-    AABB box;
-    box.min = f->v[0].position;
-    box.max = f->v[0].position;
-    aabbExpandPoint(&box, f->v[1].position);
-    aabbExpandPoint(&box, f->v[2].position);
-    return box;
-}
+/* static void aabbExpandPoint(AABB* box, Vec3 p) { */
+/*     if (p.x < box->min.x) box->min.x = p.x; */
+/*     if (p.y < box->min.y) box->min.y = p.y; */
+/*     if (p.z < box->min.z) box->min.z = p.z; */
+/*     if (p.x > box->max.x) box->max.x = p.x; */
+/*     if (p.y > box->max.y) box->max.y = p.y; */
+/*     if (p.z > box->max.z) box->max.z = p.z; */
+/* } */
 
 /**
  * @brief Returns the smallest AABB that fully contains both input boxes.
  */
-static AABB aabbUnion(AABB a, AABB b) {
-    AABB result;
-    result.min.x = (a.min.x < b.min.x) ? a.min.x : b.min.x;
-    result.min.y = (a.min.y < b.min.y) ? a.min.y : b.min.y;
-    result.min.z = (a.min.z < b.min.z) ? a.min.z : b.min.z;
-    result.max.x = (a.max.x > b.max.x) ? a.max.x : b.max.x;
-    result.max.y = (a.max.y > b.max.y) ? a.max.y : b.max.y;
-    result.max.z = (a.max.z > b.max.z) ? a.max.z : b.max.z;
-    return result;
-}
-
-extern AABB computeAABBFromFaces(const TriangleFace* faces, int count) {
-    AABB box;
-    int i;
-
-    box.min = vec3Null();
-    box.max = vec3Null();
-
-    if (faces == NULL || count <= 0) {
-        return box;
-    }
-
-    box = aabbFromFace(&faces[0]);
-    for (i = 1; i < count; i++) {
-        box = aabbUnion(box, aabbFromFace(&faces[i]));
-    }
-    return box;
-}
+/* static AABB aabbUnion(AABB a, AABB b) { */
+/*     AABB result; */
+/*     result.min.x = (a.min.x < b.min.x) ? a.min.x : b.min.x; */
+/*     result.min.y = (a.min.y < b.min.y) ? a.min.y : b.min.y; */
+/*     result.min.z = (a.min.z < b.min.z) ? a.min.z : b.min.z; */
+/*     result.max.x = (a.max.x > b.max.x) ? a.max.x : b.max.x; */
+/*     result.max.y = (a.max.y > b.max.y) ? a.max.y : b.max.y; */
+/*     result.max.z = (a.max.z > b.max.z) ? a.max.z : b.max.z; */
+/*     return result; */
+/* } */
