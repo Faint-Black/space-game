@@ -106,3 +106,46 @@ extern void debugRenderAsteroidBarycenters(void) {
         debugRenderPoints(asteroid.barycenter_array, asteroid.barycenter_count);
     }
 }
+
+static void debugRenderAABB(AABB box) {
+    const Vec3 color = vec3(0.0, 1.0, 0.0);
+    glBegin(GL_LINES);
+    glColor3f(color.x, color.y, color.z);
+    {
+        glVertex3f(box.min.x, box.min.y, box.min.z);
+        glVertex3f(box.max.x, box.min.y, box.min.z);
+        glVertex3f(box.max.x, box.min.y, box.min.z);
+        glVertex3f(box.max.x, box.min.y, box.max.z);
+        glVertex3f(box.max.x, box.min.y, box.max.z);
+        glVertex3f(box.min.x, box.min.y, box.max.z);
+        glVertex3f(box.min.x, box.min.y, box.max.z);
+        glVertex3f(box.min.x, box.min.y, box.min.z);
+
+        glVertex3f(box.min.x, box.max.y, box.min.z);
+        glVertex3f(box.max.x, box.max.y, box.min.z);
+        glVertex3f(box.max.x, box.max.y, box.min.z);
+        glVertex3f(box.max.x, box.max.y, box.max.z);
+        glVertex3f(box.max.x, box.max.y, box.max.z);
+        glVertex3f(box.min.x, box.max.y, box.max.z);
+        glVertex3f(box.min.x, box.max.y, box.max.z);
+        glVertex3f(box.min.x, box.max.y, box.min.z);
+
+        glVertex3f(box.min.x, box.min.y, box.min.z);
+        glVertex3f(box.min.x, box.max.y, box.min.z);
+        glVertex3f(box.max.x, box.min.y, box.min.z);
+        glVertex3f(box.max.x, box.max.y, box.min.z);
+        glVertex3f(box.max.x, box.min.y, box.max.z);
+        glVertex3f(box.max.x, box.max.y, box.max.z);
+        glVertex3f(box.min.x, box.min.y, box.max.z);
+        glVertex3f(box.min.x, box.max.y, box.max.z);
+    }
+    glEnd();
+}
+
+extern void debugRenderAsteroidAABBs(void) {
+    int i;
+    for (i = 0; i < getAsteroidCount(); i++) {
+        const Asteroid asteroid = getAsteroids()[i];
+        debugRenderAABB(asteroid.bounding_box);
+    }
+}

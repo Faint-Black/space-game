@@ -1,7 +1,6 @@
 #include "collision.h"
 #include "aabb_bvh.h"
 #include "asteroid.h"
-#include "render.h"
 #include "utils.h"
 #include <stddef.h>
 
@@ -46,23 +45,13 @@ static int sphereIntersectsAabb(Vec3 center, float radius, AABB box) {
 /* ======================================================================== */
 
 extern int checkCollision(Vec3 ship_pos) {
-    const Asteroid* asteroids;
-    int count;
+    const Asteroid* asteroids = getAsteroids();
+    const int count = getAsteroidCount();
     int i;
-    AABB box;
-
-    asteroids = getAsteroids();
-    count = getAsteroidCount();
-
-    if (asteroids == NULL || count <= 0) {
-        return 0;
-    }
 
     for (i = 0; i < count; i++) {
-        if (asteroids[i].mesh.faces == NULL || asteroids[i].mesh.face_count <= 0) {
-            continue;
-        }
-        box = computeAABBFromFaces(asteroids[i].mesh.faces, asteroids[i].mesh.face_count);
+        const Asteroid asteroid = asteroids[i];
+        const AABB box = asteroid.bounding_box;
         if (sphereIntersectsAabb(ship_pos, SHIP_COLLISION_RADIUS, box)) {
             return 1;
         }

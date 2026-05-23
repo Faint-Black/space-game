@@ -99,6 +99,7 @@ extern void gameRenderFrame(const GameState* game) {
     /* Render the barycenter points of each asteroid */
     if (DEBUG_MODE) {
         debugRenderAsteroidBarycenters();
+        debugRenderAsteroidAABBs();
     }
     /* Render ship + projectiles */
     renderShip();

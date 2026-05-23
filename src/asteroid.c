@@ -1,4 +1,5 @@
 #include "asteroid.h"
+#include "aabb_bvh.h"
 #include "render.h"
 #include "utils.h"
 #include <GL/gl.h>
@@ -159,6 +160,7 @@ static Asteroid initAsteroid(void) {
 
     result.barycenter_array = generateBarycenters(result.mesh, result.position);
     result.barycenter_count = result.mesh.face_count;
+    result.bounding_box = aabbComputeFromPoints(result.barycenter_array, result.barycenter_count);
 
     return result;
 }
@@ -181,6 +183,8 @@ static void updateAsteroid(Asteroid* asteroid, float dt) {
     for (i = 0; i < asteroid->barycenter_count; i++) {
         asteroid->barycenter_array[i] = vec3AddVector(asteroid->barycenter_array[i], vel);
     }
+
+    asteroid->bounding_box = aabbComputeFromPoints(asteroid->barycenter_array, asteroid->barycenter_count);
 }
 
 extern void updateAsteroids(float dt) {

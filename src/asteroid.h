@@ -1,6 +1,7 @@
 #ifndef ASTEROID_H
 #define ASTEROID_H
 
+#include "aabb_bvh.h"
 #include "render.h"
 #include "utils.h"
 #include <GL/gl.h>
@@ -12,6 +13,7 @@ typedef struct Asteroid {
     /* Collision data */
     Vec3* barycenter_array;
     int barycenter_count;
+    AABB bounding_box;
     /* Gameplay data */
     float mass;
     Vec3 position;
