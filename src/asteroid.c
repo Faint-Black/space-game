@@ -9,6 +9,7 @@
 
 #define MAX_ASTEROID_DISTRIBUTION_RADIUS 100.0F
 #define MAX_ASTEROID_VELOCITY 5.0F
+#define MAX_POINTS_PER_LEAF 4
 
 /* internal global variables */
 static Asteroid* asteroid_array = NULL;
@@ -148,6 +149,15 @@ static Vec3* generateBarycenters(Mesh mesh, Vec3 initial_pos) {
     return points;
 }
 
+static int* generateBvhIndices(int count) {
+    int* result = malloc(count * sizeof(int));
+    int i;
+    for (i = 0; i < count; i++) {
+        result[i] = i;
+    }
+    return result;
+}
+
 static Asteroid initAsteroid(void) {
     Asteroid result;
 
@@ -160,7 +170,10 @@ static Asteroid initAsteroid(void) {
 
     result.barycenter_array = generateBarycenters(result.mesh, result.position);
     result.barycenter_count = result.mesh.face_count;
-    result.bounding_box = aabbComputeFromPoints(result.barycenter_array, result.barycenter_count);
+
+    result.bvh_index_count = result.barycenter_count;
+    result.bvh_index_array = generateBvhIndices(result.bvh_index_count);
+    result.bvh = bvhBuild(result.barycenter_array, result.bvh_index_array, result.bvh_index_count, MAX_POINTS_PER_LEAF);
 
     return result;
 }
@@ -173,6 +186,19 @@ static void deinitAsteroid(Asteroid asteroid) {
     if (asteroid.barycenter_array != NULL) {
         free(asteroid.barycenter_array);
     }
+    if (asteroid.bvh_index_array != NULL) {
+        free(asteroid.bvh_index_array);
+    }
+    if (asteroid.bvh != NULL) {
+        bvhFree(asteroid.bvh);
+    }
+}
+
+static void updateBVHpos(BVHNode* node, Vec3 vel) {
+    node->aabb.min = vec3AddVector(node->aabb.min, vel);
+    node->aabb.max = vec3AddVector(node->aabb.max, vel);
+    if (node->left != NULL) updateBVHpos(node->left, vel);
+    if (node->right != NULL) updateBVHpos(node->right, vel);
 }
 
 static void updateAsteroid(Asteroid* asteroid, float dt) {
@@ -183,8 +209,7 @@ static void updateAsteroid(Asteroid* asteroid, float dt) {
     for (i = 0; i < asteroid->barycenter_count; i++) {
         asteroid->barycenter_array[i] = vec3AddVector(asteroid->barycenter_array[i], vel);
     }
-
-    asteroid->bounding_box = aabbComputeFromPoints(asteroid->barycenter_array, asteroid->barycenter_count);
+    updateBVHpos(asteroid->bvh, vel);
 }
 
 extern void updateAsteroids(float dt) {

@@ -1,4 +1,5 @@
 #include "render.h"
+#include "aabb_bvh.h"
 #include "asteroid.h"
 #include "stars.h"
 #include "utils.h"
@@ -91,9 +92,9 @@ extern void debugRenderPoints(Vec3* points, int count) {
     int i;
 
     glBegin(GL_POINTS);
+    glColor3f(color.x, color.y, color.z);
     for (i = 0; i < count; i++) {
         const Vec3 pos = points[i];
-        glColor3f(color.x, color.y, color.z);
         glVertex3f(pos.x, pos.y, pos.z);
     }
     glEnd();
@@ -107,8 +108,7 @@ extern void debugRenderAsteroidBarycenters(void) {
     }
 }
 
-static void debugRenderAABB(AABB box) {
-    const Vec3 color = vec3(0.0, 1.0, 0.0);
+static void debugRenderAABB(AABB box, Vec3 color) {
     glBegin(GL_LINES);
     glColor3f(color.x, color.y, color.z);
     {
@@ -142,10 +142,25 @@ static void debugRenderAABB(AABB box) {
     glEnd();
 }
 
-extern void debugRenderAsteroidAABBs(void) {
+static void debugRenderBVH(BVHNode* node, int depth) {
+    const int color_cycle_size = 4;
+    Vec3 color_cycle[4];
+    color_cycle[0] = vec3(1, 1, 1); /* white */
+    color_cycle[1] = vec3(1, 0, 0); /* red */
+    color_cycle[2] = vec3(0, 1, 0); /* green */
+    color_cycle[3] = vec3(0, 0, 1); /* blue */
+
+    if (node == NULL) return;
+
+    debugRenderAABB(node->aabb, color_cycle[depth % color_cycle_size]);
+    if (node->left != NULL) debugRenderBVH(node->left, depth + 1);
+    if (node->right != NULL) debugRenderBVH(node->right, depth + 1);
+}
+
+extern void debugRenderAsteroidBVHs(void) {
     int i;
     for (i = 0; i < getAsteroidCount(); i++) {
         const Asteroid asteroid = getAsteroids()[i];
-        debugRenderAABB(asteroid.bounding_box);
+        debugRenderBVH(asteroid.bvh, 0);
     }
 }

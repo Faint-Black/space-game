@@ -7,13 +7,17 @@
 #include <GL/gl.h>
 
 typedef struct Asteroid {
-    /* Graphical Vertex data */
+    /* Graphical data */
     Mesh mesh;
     GLuint texture_id;
+
     /* Collision data */
     Vec3* barycenter_array;
     int barycenter_count;
-    AABB bounding_box;
+    int* bvh_index_array;
+    int bvh_index_count;
+    BVHNode* bvh;
+
     /* Gameplay data */
     float mass;
     Vec3 position;

@@ -51,8 +51,8 @@ extern void debugRenderPoints(Vec3* points, int count);
 extern void debugRenderAsteroidBarycenters(void);
 
 /**
- * @brief (For debug use only) Renders the bounding boxes of the asteroids.
+ * @brief (For debug use only) Renders the BVH of the asteroids.
  */
-extern void debugRenderAsteroidAABBs(void);
+extern void debugRenderAsteroidBVHs(void);
 
 #endif /* RENDER_H */

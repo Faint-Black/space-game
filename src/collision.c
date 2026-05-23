@@ -51,7 +51,7 @@ extern int checkCollision(Vec3 ship_pos) {
 
     for (i = 0; i < count; i++) {
         const Asteroid asteroid = asteroids[i];
-        const AABB box = asteroid.bounding_box;
+        const AABB box = asteroid.bvh->aabb; /* root AABB */
         if (sphereIntersectsAabb(ship_pos, SHIP_COLLISION_RADIUS, box)) {
             return 1;
         }
