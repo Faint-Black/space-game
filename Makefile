@@ -16,6 +16,9 @@ CFLAGS       += $(GL_CFLAGS) $(SDL2_CFLAGS) $(IMG_CFLAGS) $(GLU_CFLAGS)
 LDFLAGS      += -lm
 LDFLAGS      += $(GL_LDFLAGS) $(SDL2_LDFLAGS) $(IMG_LDFLAGS) $(GLU_LDFLAGS)
 
+DEBUG        ?= 0
+CFLAGS       += -DDEBUG_MODE=$(DEBUG)
+
 SOURCES      := $(wildcard src/*.c)
 HEADERS      := $(wildcard src/*.h)
 OBJECTS      := $(patsubst %.c,%.o,$(SOURCES))
@@ -27,10 +30,6 @@ $(BINARY): $(OBJECTS)
 
 src/%.o: src/%.c
 	$(CC) -c $^ -o $@ $(CFLAGS)
-
-check:
-	clang-tidy $(SOURCES) $(HEADERS)
-	clang-format -i $(SOURCES) $(HEADERS)
 
 run: all
 	./$(BINARY)

@@ -120,14 +120,13 @@ sudo apt install libopengl-dev libsdl2-dev libsdl2-image-dev
 ** Compilação
 #+BEGIN_SRC shell
 make -j4
-#+END_SRC
-
-** Verificação
-#+BEGIN_SRC shell
-make check
+# ou, para compilar no modo debug:
+make -j4 DEBUG=1
 #+END_SRC
 
 ** Execução
 #+BEGIN_SRC shell
 make run -j4
+# ou, para compilar e rodar no modo debug:
+make run -j4 DEBUG=1
 #+END_SRC

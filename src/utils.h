@@ -1,9 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-/* Set this to "1" for extra run-time information */
-#define DEBUG_MODE 0
-
 #define PI 3.14159265358979323846
 
 typedef struct Vec3 {
