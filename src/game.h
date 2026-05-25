@@ -24,6 +24,7 @@ typedef struct GameState {
     SDL_Window*   sdl_window;
     SDL_GLContext gl_context;
     bool          running;
+    bool          paused;
     Uint32        last_frame_time;
 
     /*

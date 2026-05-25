@@ -6,4 +6,10 @@
  */
 extern void renderHUD(int score, int lives);
 
+/**
+ * @brief Draws a centered pause indicator (two vertical bars) over the scene.
+ *        Should be called after renderHUD when the game is paused.
+ */
+extern void renderPauseOverlay(void);
+
 #endif /* HUD_H */

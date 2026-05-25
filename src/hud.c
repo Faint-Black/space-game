@@ -215,3 +215,84 @@ extern void renderHUD(int score, int lives) {
     if (light_was_enabled) glEnable(GL_LIGHTING);
     if (cull_was_enabled) glEnable(GL_CULL_FACE);
 }
+
+/* ======================================================================== */
+/*  Pause overlay                                                            */
+/* ======================================================================== */
+
+#define PAUSE_BAR_WIDTH  20.0F
+#define PAUSE_BAR_HEIGHT 60.0F
+#define PAUSE_BAR_GAP    14.0F
+
+#define PAUSE_COLOR_R 1.0F
+#define PAUSE_COLOR_G 1.0F
+#define PAUSE_COLOR_B 0.3F
+
+extern void renderPauseOverlay(void) {
+    GLint viewport[4];
+    float w;
+    float h;
+    float cx;
+    float cy;
+    float bw;
+    float bh_half;
+    float gap;
+    GLboolean depth_was_enabled;
+    GLboolean light_was_enabled;
+    GLboolean cull_was_enabled;
+    GLfloat saved_color[4];
+
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    w = (float)viewport[2];
+    h = (float)viewport[3];
+
+    cx = w * 0.5F;
+    cy = h * 0.5F;
+    bw = PAUSE_BAR_WIDTH;
+    bh_half = PAUSE_BAR_HEIGHT * 0.5F;
+    gap = PAUSE_BAR_GAP;
+
+    depth_was_enabled = glIsEnabled(GL_DEPTH_TEST);
+    light_was_enabled = glIsEnabled(GL_LIGHTING);
+    cull_was_enabled  = glIsEnabled(GL_CULL_FACE);
+    glGetFloatv(GL_CURRENT_COLOR, saved_color);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0.0, (double)w, 0.0, (double)h, -1.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glColor3f(PAUSE_COLOR_R, PAUSE_COLOR_G, PAUSE_COLOR_B);
+
+    glBegin(GL_QUADS);
+    /* Left bar */
+    glVertex2f(cx - gap - bw, cy - bh_half);
+    glVertex2f(cx - gap,      cy - bh_half);
+    glVertex2f(cx - gap,      cy + bh_half);
+    glVertex2f(cx - gap - bw, cy + bh_half);
+    /* Right bar */
+    glVertex2f(cx + gap,      cy - bh_half);
+    glVertex2f(cx + gap + bw, cy - bh_half);
+    glVertex2f(cx + gap + bw, cy + bh_half);
+    glVertex2f(cx + gap,      cy + bh_half);
+    glEnd();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    glColor4fv(saved_color);
+
+    if (depth_was_enabled) glEnable(GL_DEPTH_TEST);
+    if (light_was_enabled) glEnable(GL_LIGHTING);
+    if (cull_was_enabled) glEnable(GL_CULL_FACE);
+}

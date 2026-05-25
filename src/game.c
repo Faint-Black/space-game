@@ -33,6 +33,7 @@ static void deinitializeSDLandOpenGL(GameState* game);
 static void setupLighting(void);
 static void handleShipCollision(GameState* game, float dt);
 static void handleProjectileCollisions(void);
+static void toggleFullscreen(SDL_Window* window);
 
 /* =========================================================
  * gameInit
@@ -47,6 +48,7 @@ extern GameState* gameInit(void) {
     scoreInit();
 
     game->running                  = true;
+    game->paused                   = false;
     game->last_frame_time          = SDL_GetTicks();
     game->ship_invincibility_timer = 0.0F;
     game->ship_hit_flash_timer     = 0.0F;
@@ -72,6 +74,8 @@ extern void gamePollEvents(GameState* game) {
             case SDLK_g:      shipToggleArm();        break;
             case SDLK_n:      shipToggleScanner();    break;
             case SDLK_k:      shipLockCamera();       break;
+            case SDLK_p:      game->paused = !game->paused; break;
+            case SDLK_F11:    toggleFullscreen(game->sdl_window); break;
             default: break;
             }
             break;
@@ -100,6 +104,10 @@ extern void gameUpdateLogic(GameState* game) {
 
     /* Freeze everything once game is over */
     if (scoreIsGameOver()) return;
+
+    /* Freeze everything while paused. last_frame_time still advances, so dt
+     * remains small after unpausing instead of producing a physics spike. */
+    if (game->paused) return;
 
     updateShip(dt);
     updateAsteroids(dt);
@@ -143,6 +151,10 @@ extern void gameRenderFrame(const GameState* game) {
     renderShip();
     renderScanner();
     renderHUD(scoreGetPoints(), scoreGetLives());
+
+    if (game->paused) {
+        renderPauseOverlay();
+    }
 
     SDL_GL_SwapWindow(game->sdl_window);
 }
@@ -307,4 +319,21 @@ static void setupLighting(void) {
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+}
+
+/* =========================================================
+ * toggleFullscreen  (private)
+ *
+ * Switches the SDL window between borderless desktop-fullscreen
+ * and windowed mode. Borderless desktop is used (not exclusive
+ * fullscreen) so the OS resolution is reused and alt-tabbing
+ * stays smooth.
+ * ========================================================= */
+static void toggleFullscreen(SDL_Window* window) {
+    Uint32 flags = SDL_GetWindowFlags(window);
+    if ((flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
+        SDL_SetWindowFullscreen(window, 0);
+    } else {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    }
 }
