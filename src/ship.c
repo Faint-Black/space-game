@@ -551,3 +551,10 @@ extern void renderScanner() {
     glEnable(GL_LIGHTING);
     glPopMatrix();
 }
+/* ======================================================================== */
+/*  Projectile accessor                                                     */
+/* ======================================================================== */
+
+extern const Projectile* getProjectiles(void) {
+    return global_ship.projectiles;
+}

@@ -166,4 +166,10 @@ extern void renderScanner();
  */
 extern int shipPointInScanner(Vec3 point);
 
+/**
+ * @brief Returns a read-only pointer to the projectile array (MAX_PROJECTILES entries).
+ * Check .active on each entry before using it.
+ */
+extern const Projectile* getProjectiles(void);
+
 #endif /* SHIP_H */
