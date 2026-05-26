@@ -7,7 +7,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#define MAX_ASTEROID_DISTRIBUTION_RADIUS 100.0F
 #define MAX_ASTEROID_VELOCITY 5.0F
 #define MAX_POINTS_PER_LEAF 4
 
@@ -162,7 +161,7 @@ static Asteroid initAsteroid(void) {
     Asteroid result;
 
     result.mass = 1.0F;
-    result.position = vec3MulScalar(vec3Random(), MAX_ASTEROID_DISTRIBUTION_RADIUS);
+    result.position = vec3MulScalar(vec3Random(), randNormalizedFloat() * INTERACTION_BOUNDS_RADIUS);
     result.velocity = vec3MulScalar(vec3Random(), MAX_ASTEROID_VELOCITY);
 
     result.mesh = resolveMiscMeshData(generateSphereMesh(20, 20));

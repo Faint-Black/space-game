@@ -3,6 +3,10 @@
 
 #define PI 3.14159265358979323846
 
+/* Defines the playable area sphere with a radius of 1 kilometer,
+   the player and other entities must never cross it */
+#define INTERACTION_BOUNDS_RADIUS 1000.0F
+
 typedef struct Vec3 {
     float x;
     float y;
