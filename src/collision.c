@@ -115,6 +115,8 @@ static int aabbVsAsteroidBVH(AABB ship_box, const BVHNode* node) {
  * ========================================================= */
 static int sphereVsAABB(Vec3 center, float radius, AABB box) {
     float dx = 0.0F, dy = 0.0F, dz = 0.0F;
+    float squaredDistance;
+    float squaredRadius;
 
     if (center.x < box.min.x) {
         dx = box.min.x - center.x;
@@ -134,14 +136,10 @@ static int sphereVsAABB(Vec3 center, float radius, AABB box) {
         dz = center.z - box.max.z;
     }
 
-    float squaredDistance = dx * dx + dy * dy + dz * dz;
-    float squaredRadius = radius * radius;
-    
-    if (squaredDistance <= squaredRadius) {
-        return 1;
-    } else {
-        return 0;
-    }
+    squaredDistance = dx*dx + dy*dy + dz*dz;
+    squaredRadius   = radius * radius;
+
+    return squaredDistance <= squaredRadius;
 }
 
 /* =========================================================
