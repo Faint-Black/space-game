@@ -28,6 +28,22 @@ extern AABB aabbComputeFromPoints(const Vec3* points, int count);
 extern AABB aabbMerge(AABB a, AABB b);
 
 /**
+ * @brief Tests if two AABBs overlap on all three axes.
+ *
+ * @return 1 if they overlap, 0 if separated.
+ */
+extern int aabbVsAABB(AABB a, AABB b);
+
+/**
+ * @brief Tests if a triangle (world-space vertices) intersects an AABB.
+ * Uses the SAT (Separating Axis Theorem) with 13 candidate axes:
+ * 3 AABB face normals, 1 triangle normal, 9 edge cross-products.
+ *
+ * @return 1 if they intersect, 0 if separated.
+ */
+extern int triVsAABB(Vec3 v0, Vec3 v1, Vec3 v2, AABB box);
+
+/**
  * @brief Builds the BVH tree top-down using the provided points.
  * @param points Array with all world points.
  * @param indices Array of indices corresponding to the points that should enter the tree.
@@ -52,7 +68,7 @@ extern void bvhFree(BVHNode* root);
 extern void bvhRefit(BVHNode* node, const Vec3* current_points);
 
 /**
- * @brief Helper that checks if a given node is a leaf or not
+ * @brief Helper that checks if a given node is a leaf or not.
  */
 extern int bvhNodeIsLeaf(const BVHNode* node);
 

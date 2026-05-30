@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#define MAX_ASTEROID_VELOCITY 5.0F
+#define MAX_ASTEROID_VELOCITY 5.0F 
 #define MAX_POINTS_PER_LEAF 4
 
 /* internal global variables */

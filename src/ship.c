@@ -55,7 +55,7 @@ extern void initShip() {
     global_ship.roll = 0.0F;
 
     global_ship.thrustPower = 25.0F;
-    global_ship.rotationSpeed = 2.0F;
+    global_ship.rotationSpeed = 1.0F;
     global_ship.dampingLinear = 0.004F;
     global_ship.dampingAngular = 0.008F;
 

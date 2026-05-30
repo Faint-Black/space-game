@@ -193,28 +193,200 @@ extern int bvhNodeIsLeaf(const BVHNode* node) {
     return (node->left == NULL && node->right == NULL);
 }
 
-/**
- * @brief Expands the bounding box limits to include the given point.
- */
-/* static void aabbExpandPoint(AABB* box, Vec3 p) { */
-/*     if (p.x < box->min.x) box->min.x = p.x; */
-/*     if (p.y < box->min.y) box->min.y = p.y; */
-/*     if (p.z < box->min.z) box->min.z = p.z; */
-/*     if (p.x > box->max.x) box->max.x = p.x; */
-/*     if (p.y > box->max.y) box->max.y = p.y; */
-/*     if (p.z > box->max.z) box->max.z = p.z; */
-/* } */
+#define ABSF(x) ((x) < 0.0F ? -(x) : (x))
 
-/**
- * @brief Returns the smallest AABB that fully contains both input boxes.
- */
-/* static AABB aabbUnion(AABB a, AABB b) { */
-/*     AABB result; */
-/*     result.min.x = (a.min.x < b.min.x) ? a.min.x : b.min.x; */
-/*     result.min.y = (a.min.y < b.min.y) ? a.min.y : b.min.y; */
-/*     result.min.z = (a.min.z < b.min.z) ? a.min.z : b.min.z; */
-/*     result.max.x = (a.max.x > b.max.x) ? a.max.x : b.max.x; */
-/*     result.max.y = (a.max.y > b.max.y) ? a.max.y : b.max.y; */
-/*     result.max.z = (a.max.z > b.max.z) ? a.max.z : b.max.z; */
-/*     return result; */
-/* } */
+/* ================================================================
+ * aabbVsAABB
+ * ================================================================ */
+extern int aabbVsAABB(AABB a, AABB b) {
+    if (a.max.x < b.min.x || a.min.x > b.max.x) {
+        return 0;
+    }
+    if (a.max.y < b.min.y || a.min.y > b.max.y) {
+        return 0;
+    }
+    if (a.max.z < b.min.z || a.min.z > b.max.z) {
+        return 0;
+    }
+    return 1;
+}
+
+/* ================================================================
+ * triVsAABB
+ * ================================================================ */
+extern int triVsAABB(Vec3 v0, Vec3 v1, Vec3 v2, AABB box) {
+    Vec3  bc, be;
+    Vec3  f0, f1, f2;
+    Vec3  n;
+    float p0, p1, p2, r;
+    float abs_f0_z, abs_f0_y, abs_f0_x;
+    float abs_f1_z, abs_f1_y, abs_f1_x;
+    float abs_f2_z, abs_f2_y, abs_f2_x;
+
+    #define TSAT_X(ey, ez, fay, faz) \
+        p0 =  (ey)*v0.y - (ez)*v0.z; \
+        p2 =  (ey)*v2.y - (ez)*v2.z; \
+        r  = (fay)*be.y + (faz)*be.z; \
+        if (p0 < p2) { \
+            if (p0 > r || p2 < -r) return 0; \
+        } else { \
+            if (p2 > r || p0 < -r) return 0; \
+        }
+
+    #define TSAT_Y(ex, ez, fax, faz) \
+        p0 = -(ex)*v0.x + (ez)*v0.z; \
+        p2 = -(ex)*v2.x + (ez)*v2.z; \
+        r  = (fax)*be.x + (faz)*be.z; \
+        if (p0 < p2) { \
+            if (p0 > r || p2 < -r) return 0; \
+        } else { \
+            if (p2 > r || p0 < -r) return 0; \
+        }
+
+    #define TSAT_Z(ex, ey, fax, fay) \
+        p0 = (ex)*v0.x - (ey)*v0.y; \
+        p1 = (ex)*v1.x - (ey)*v1.y; \
+        r  = (fax)*be.x + (fay)*be.y; \
+        if (p0 < p1) { \
+            if (p0 > r || p1 < -r) return 0; \
+        } else { \
+            if (p1 > r || p0 < -r) return 0; \
+        }
+
+    bc.x = (box.min.x + box.max.x) * 0.5F;
+    bc.y = (box.min.y + box.max.y) * 0.5F;
+    bc.z = (box.min.z + box.max.z) * 0.5F;
+    be.x = (box.max.x - box.min.x) * 0.5F;
+    be.y = (box.max.y - box.min.y) * 0.5F;
+    be.z = (box.max.z - box.min.z) * 0.5F;
+
+    v0 = vec3SubVector(v0, bc);
+    v1 = vec3SubVector(v1, bc);
+    v2 = vec3SubVector(v2, bc);
+
+    f0 = vec3SubVector(v1, v0);
+    f1 = vec3SubVector(v2, v1);
+    f2 = vec3SubVector(v0, v2);
+
+    if (f0.z < 0.0F) {
+        abs_f0_z = -f0.z;
+    } else {
+        abs_f0_z = f0.z;
+    }
+    
+    if (f0.y < 0.0F) {
+        abs_f0_y = -f0.y;
+    } else {
+        abs_f0_y = f0.y;
+    }
+    
+    if (f0.x < 0.0F) {
+        abs_f0_x = -f0.x;
+    } else {
+        abs_f0_x = f0.x;
+    }
+
+    if (f1.z < 0.0F) {
+        abs_f1_z = -f1.z;
+    } else {
+        abs_f1_z = f1.z;
+    }
+    
+    if (f1.y < 0.0F) {
+        abs_f1_y = -f1.y;
+    } else {
+        abs_f1_y = f1.y;
+    }
+    
+    if (f1.x < 0.0F) {
+        abs_f1_x = -f1.x;
+    } else {
+        abs_f1_x = f1.x;
+    }
+
+    if (f2.z < 0.0F) {
+        abs_f2_z = -f2.z;
+    } else {
+        abs_f2_z = f2.z;
+    }
+    
+    if (f2.y < 0.0F) {
+        abs_f2_y = -f2.y;
+    } else {
+        abs_f2_y = f2.y;
+    }
+    
+    if (f2.x < 0.0F) {
+        abs_f2_x = -f2.x;
+    } else {
+        abs_f2_x = f2.x;
+    }
+
+    TSAT_X( f0.z, f0.y, abs_f0_z, abs_f0_y)
+    TSAT_Y(-f0.z, f0.x, abs_f0_z, abs_f0_x)
+    TSAT_Z( f0.y,-f0.x, abs_f0_y, abs_f0_x)
+
+    TSAT_X( f1.z, f1.y, abs_f1_z, abs_f1_y)
+    TSAT_Y(-f1.z, f1.x, abs_f1_z, abs_f1_x)
+    TSAT_Z( f1.y,-f1.x, abs_f1_y, abs_f1_x)
+
+    TSAT_X( f2.z, f2.y, abs_f2_z, abs_f2_y)
+    TSAT_Y(-f2.z, f2.x, abs_f2_z, abs_f2_x)
+    TSAT_Z( f2.y,-f2.x, abs_f2_y, abs_f2_x)
+
+    #undef TSAT_X
+    #undef TSAT_Y
+    #undef TSAT_Z
+
+    if (v0.x > be.x && v1.x > be.x && v2.x > be.x) {
+        return 0;
+    }
+    if (v0.x < -be.x && v1.x < -be.x && v2.x < -be.x) {
+        return 0;
+    }
+    if (v0.y > be.y && v1.y > be.y && v2.y > be.y) {
+        return 0;
+    }
+    if (v0.y < -be.y && v1.y < -be.y && v2.y < -be.y) {
+        return 0;
+    }
+    if (v0.z > be.z && v1.z > be.z && v2.z > be.z) {
+        return 0;
+    }
+    if (v0.z < -be.z && v1.z < -be.z && v2.z < -be.z) {
+        return 0;
+    }
+
+    n = vec3Cross(f0, f1);
+    
+    if (n.x < 0.0F) {
+        abs_f0_x = -n.x;
+    } else {
+        abs_f0_x = n.x;
+    }
+    
+    if (n.y < 0.0F) {
+        abs_f0_y = -n.y;
+    } else {
+        abs_f0_y = n.y;
+    }
+    
+    if (n.z < 0.0F) {
+        abs_f0_z = -n.z;
+    } else {
+        abs_f0_z = n.z;
+    }
+    
+    r = abs_f0_x * be.x + abs_f0_y * be.y + abs_f0_z * be.z;
+    
+    if (vec3Dot(n, v0) < 0.0F) {
+        p0 = -vec3Dot(n, v0);
+    } else {
+        p0 = vec3Dot(n, v0);
+    }
+    
+    if (p0 > r) {
+        return 0;
+    }
+    return 1;
+}

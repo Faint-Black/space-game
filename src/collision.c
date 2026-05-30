@@ -5,136 +5,261 @@
 #include "utils.h"
 #include <stddef.h>
 
-/* Collision sphere radius for the ship */
-#define SHIP_COLLISION_RADIUS       1.5F
 /* Collision sphere radius for each projectile */
 #define PROJECTILE_COLLISION_RADIUS 0.3F
 
+#define SHIP_LOCAL_MIN_X (-2.3F)
+#define SHIP_LOCAL_MAX_X ( 2.3F)
+#define SHIP_LOCAL_MIN_Y (-2.1F)
+#define SHIP_LOCAL_MAX_Y ( 1.1F)
+#define SHIP_LOCAL_MIN_Z (-3.3F)   
+#define SHIP_LOCAL_MAX_Z ( 2.3F)   
+
 /* =========================================================
- * sphereVsAABB
- *
- * Computes the squared distance from the sphere center to the
- * nearest point on the AABB. No sqrt needed.
+ * reconstructAxes
  * ========================================================= */
-static int sphereVsAABB(Vec3 center, float radius, AABB box) {
-    float dx = 0.0F, dy = 0.0F, dz = 0.0F;
+static void reconstructAxes(Vec3 fwd, Vec3* out_right, Vec3* out_up) {
+    Vec3 helper;
+    Vec3 right;
+    Vec3 up;
+    float fy;
 
-    if      (center.x < box.min.x) dx = box.min.x - center.x;
-    else if (center.x > box.max.x) dx = center.x  - box.max.x;
+    if (fwd.y < 0.0F) {
+        fy = -fwd.y;
+    } else {
+        fy = fwd.y;
+    }
 
-    if      (center.y < box.min.y) dy = box.min.y - center.y;
-    else if (center.y > box.max.y) dy = center.y  - box.max.y;
+    if (fy < 0.9F) {
+        helper.x = 0.0F;
+        helper.y = 1.0F;
+        helper.z = 0.0F;
+    } else {
+        helper.x = 1.0F;
+        helper.y = 0.0F;
+        helper.z = 0.0F;
+    }
 
-    if      (center.z < box.min.z) dz = box.min.z - center.z;
-    else if (center.z > box.max.z) dz = center.z  - box.max.z;
+    /* right = normalize(cross(helper, fwd)) */
+    right = vec3Normalize(vec3Cross(helper, fwd));
 
-    return (dx*dx + dy*dy + dz*dz) <= (radius * radius);
+    /* up = cross(fwd, right) */
+    up = vec3Cross(fwd, right);
+
+    *out_right = right;
+    *out_up    = up;
 }
 
 /* =========================================================
- * bvhSphereQuery
- *
- * Recursive BVH traversal with spatial pruning 
- *   - Sphere misses node AABB -> PRUNE (return 0 immediately)
- *   - Sphere hits  + leaf     -> test distance to each stored point
- *   - Sphere hits  + internal -> recurse into children
+ * shipBuildWorldAABB
  * ========================================================= */
-static int bvhSphereQuery(const BVHNode* node,
-                          const Vec3*    points,
-                          Vec3           center,
-                          float          radius)
-{
-    int i;
-    if (node == NULL) return 0;
+static AABB shipBuildWorldAABB(Vec3 pos, Vec3 fwd, Vec3 up, Vec3 right) {
+    static const float lx[2] = { SHIP_LOCAL_MIN_X, SHIP_LOCAL_MAX_X };
+    static const float ly[2] = { SHIP_LOCAL_MIN_Y, SHIP_LOCAL_MAX_Y };
+    static const float lz[2] = { SHIP_LOCAL_MIN_Z, SHIP_LOCAL_MAX_Z };
 
-    /* Pruning step: early-out if sphere does not touch this node's AABB */
-    if (!sphereVsAABB(center, radius, node->aabb)) return 0;
+    AABB box;
+    int ix, iy, iz;
+    int first = 1;
 
-    /* Leaf node: test the actual stored points */
-    if (bvhNodeIsLeaf(node)) {
-        for (i = 0; i < node->num_points; i++) {
-            if (vec3Distance(points[node->point_indices[i]], center) <= radius)
-                return 1;
+    for (ix = 0; ix < 2; ix++) {
+        for (iy = 0; iy < 2; iy++) {
+            for (iz = 0; iz < 2; iz++) {
+                Vec3 corner;
+                corner.x = pos.x + right.x*lx[ix] + up.x*ly[iy] + fwd.x*lz[iz];
+                corner.y = pos.y + right.y*lx[ix] + up.y*ly[iy] + fwd.y*lz[iz];
+                corner.z = pos.z + right.z*lx[ix] + up.z*ly[iy] + fwd.z*lz[iz];
+
+                if (first) {
+                    box.min = corner;
+                    box.max = corner;
+                    first = 0;
+                } else {
+                    if (corner.x < box.min.x) box.min.x = corner.x;
+                    if (corner.y < box.min.y) box.min.y = corner.y;
+                    if (corner.z < box.min.z) box.min.z = corner.z;
+                    if (corner.x > box.max.x) box.max.x = corner.x;
+                    if (corner.y > box.max.y) box.max.y = corner.y;
+                    if (corner.z > box.max.z) box.max.z = corner.z;
+                }
+            }
         }
+    }
+    return box;
+}
+
+/* =========================================================
+ * aabbVsAsteroidBVH
+ * ========================================================= */
+static int aabbVsAsteroidBVH(AABB ship_box, const BVHNode* node) {
+    if (node == NULL){ 
         return 0;
     }
-
-    /* Internal node: visit both children */
-    if (bvhSphereQuery(node->left,  points, center, radius)) return 1;
-    if (bvhSphereQuery(node->right, points, center, radius)) return 1;
+    if (!aabbVsAABB(ship_box, node->aabb)){ 
+        return 0;
+    }
+    if (bvhNodeIsLeaf(node)){  
+        return 1;
+    }
+    if (aabbVsAsteroidBVH(ship_box, node->left)){  
+        return 1;
+    }   
+    if (aabbVsAsteroidBVH(ship_box, node->right)){
+        return 1;
+    }
     return 0;
 }
 
 /* =========================================================
- * checkCollision  -  Required interface 
- * Returns 1 if the ship sphere overlaps any asteroid BVH.
+ * sphereVsAABB  
+ * ========================================================= */
+static int sphereVsAABB(Vec3 center, float radius, AABB box) {
+    float dx = 0.0F, dy = 0.0F, dz = 0.0F;
+
+    if (center.x < box.min.x) {
+        dx = box.min.x - center.x;
+    } else if (center.x > box.max.x) {
+        dx = center.x - box.max.x;
+    }
+
+    if (center.y < box.min.y) {
+        dy = box.min.y - center.y;
+    } else if (center.y > box.max.y) {
+        dy = center.y - box.max.y;
+    }
+
+    if (center.z < box.min.z) {
+        dz = box.min.z - center.z;
+    } else if (center.z > box.max.z) {
+        dz = center.z - box.max.z;
+    }
+
+    float squaredDistance = dx * dx + dy * dy + dz * dz;
+    float squaredRadius = radius * radius;
+    
+    if (squaredDistance <= squaredRadius) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/* =========================================================
+ * bvhSphereQuery  
+ * ========================================================= */
+static int bvhSphereQuery(const BVHNode* node, const Vec3* points, Vec3 center, float radius) {
+    int i;
+    
+    if (node == NULL) {
+        return 0;
+    }
+
+    if (!sphereVsAABB(center, radius, node->aabb)) {
+        return 0;
+    }
+    if (bvhNodeIsLeaf(node)) {
+        for (i = 0; i < node->num_points; i++) {
+            if (vec3Distance(points[node->point_indices[i]], center) <= radius) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    if (bvhSphereQuery(node->left, points, center, radius)) {
+        return 1;
+    }   
+    if (bvhSphereQuery(node->right, points, center, radius)) {
+        return 1;
+    }
+    return 0;
+}
+
+/* =========================================================
+ * checkCollision
  * ========================================================= */
 extern int checkCollision(Vec3 ship_pos) {
     const Asteroid* asteroids = getAsteroids();
     const int       count     = getAsteroidCount();
+    AABB ship_box;
+    Vec3 fwd, up, right;
     int i;
 
-    if (!asteroids || count <= 0) return 0;
+    if (!asteroids || count <= 0) {
+        return 0;
+    }
+
+    fwd = getShipForward();
+    reconstructAxes(fwd, &right, &up);
+
+    ship_box = shipBuildWorldAABB(ship_pos, fwd, up, right);
 
     for (i = 0; i < count; i++) {
         const Asteroid* ast = &asteroids[i];
-        if (!ast->bvh || !ast->barycenter_array) continue;
-
-        /* Broadphase: sphere vs root AABB */
-        if (!sphereVsAABB(ship_pos, SHIP_COLLISION_RADIUS, ast->bvh->aabb))
+        
+        if (!ast->bvh) {
             continue;
-
-        /* Narrowphase: full BVH traversal with pruning */
-        if (bvhSphereQuery(ast->bvh, ast->barycenter_array,
-                           ship_pos, SHIP_COLLISION_RADIUS))
+        }
+        /* Broadphase: AABB ship vs AABB root */
+        if (!aabbVsAABB(ship_box, ast->bvh->aabb)) {
+            continue;
+        }
+        /* Narrowphase: Detailed collision detection between ship and asteroid geometry */
+        if (aabbVsAsteroidBVH(ship_box, ast->bvh)) {
             return 1;
-    }
+        }
+    }   
     return 0;
 }
 
 /* =========================================================
  * checkProjectileCollision
- *
- * Reads active projectiles via getProjectiles() 
- *
- * Iterates projectiles x asteroids; returns on the first hit
- * and fills the output indices so game.c can deactivate the
- * projectile and update the score.
  * ========================================================= */
-extern int checkProjectileCollision(int* hit_asteroid_idx,
-                                    int* hit_projectile_idx)
-{
+extern int checkProjectileCollision(int* hit_asteroid_idx, int* hit_projectile_idx) {
     const Asteroid*   asteroids = getAsteroids();
     const int         ast_count = getAsteroidCount();
     const Projectile* projs     = getProjectiles();
     int i, j;
 
-    if (hit_asteroid_idx)   *hit_asteroid_idx   = -1;
-    if (hit_projectile_idx) *hit_projectile_idx = -1;
+    if (hit_asteroid_idx) {
+        *hit_asteroid_idx = -1;
+    }
+    
+    if (hit_projectile_idx) {
+        *hit_projectile_idx = -1;
+    }
 
-    if (!asteroids || ast_count <= 0 || !projs) return 0;
+    if (!asteroids || ast_count <= 0 || !projs) {
+        return 0;
+    }
 
     for (i = 0; i < MAX_PROJECTILES; i++) {
         Vec3 pos;
-        if (!projs[i].active) continue;
+        
+        if (!projs[i].active) {
+            continue;
+        }
+        
         pos = projs[i].position;
 
         for (j = 0; j < ast_count; j++) {
             const Asteroid* ast = &asteroids[j];
-            if (!ast->bvh || !ast->barycenter_array) continue;
-
-            /* Broadphase */
-            if (!sphereVsAABB(pos, PROJECTILE_COLLISION_RADIUS, ast->bvh->aabb))
+            
+            if (!ast->bvh || !ast->barycenter_array) {
                 continue;
-
-            /* Narrowphase */
-            if (bvhSphereQuery(ast->bvh, ast->barycenter_array,
-                               pos, PROJECTILE_COLLISION_RADIUS)) {
-                if (hit_asteroid_idx)   *hit_asteroid_idx   = j;
-                if (hit_projectile_idx) *hit_projectile_idx = i;
+            }
+            if (!sphereVsAABB(pos, PROJECTILE_COLLISION_RADIUS, ast->bvh->aabb)) {
+                continue;
+            }
+            if (bvhSphereQuery(ast->bvh, ast->barycenter_array, pos, PROJECTILE_COLLISION_RADIUS)) {
+                if (hit_asteroid_idx) {
+                    *hit_asteroid_idx = j;
+                }             
+                if (hit_projectile_idx) {
+                    *hit_projectile_idx = i;
+                }              
                 return 1;
             }
         }
-    }
+    }   
     return 0;
 }

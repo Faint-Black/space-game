@@ -60,4 +60,10 @@ extern void debugRenderAsteroidBVHs(void);
  */
 extern void debugRenderAsteroidLeafBVHs(void);
 
+/**
+ * @brief (For debug use only) Renders only leaf BVH nodes of every asteroid.
+ * Yellow = leaf colliding with the ship AABB. Red = no collision.
+ */
+extern void debugRenderAsteroidCollisions(void);
+
 #endif /* RENDER_H */
