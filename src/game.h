@@ -38,6 +38,21 @@ typedef struct GameState {
      */
     float ship_invincibility_timer;
     float ship_hit_flash_timer;
+
+    /*
+     * show_game_over
+     *   Raised when the player runs out of lives. The window stays open and
+     *   the game-over screen is drawn instead of closing the program, so the
+     *   player can read the final score and restart with R.
+     */
+    bool  show_game_over;
+
+    /*
+     * show_title
+     *   Raised at startup so the title screen is shown and the simulation is
+     *   frozen until the player presses ENTER to begin.
+     */
+    bool  show_title;
 } GameState;
 
 extern GameState* gameInit(void);
@@ -45,5 +60,6 @@ extern void       gamePollEvents(GameState* game);
 extern void       gameUpdateLogic(GameState* game);
 extern void       gameRenderFrame(const GameState* game);
 extern void       gameDeinit(GameState* game);
+extern void       gameRestart(GameState* game);
 
 #endif /* GAME_H */

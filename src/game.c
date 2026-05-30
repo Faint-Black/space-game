@@ -28,6 +28,9 @@
 /* Duration of the red screen flash after taking damage (seconds). */
 #define HIT_FLASH_DURATION 0.3F
 
+/* Number of asteroids spawned at the start of a run and on every restart. */
+#define ASTEROID_COUNT 50
+
 static int  initializeSDLandOpenGL(GameState* game);
 static void deinitializeSDLandOpenGL(GameState* game);
 static void setupLighting(void);
@@ -44,7 +47,7 @@ extern GameState* gameInit(void) {
 
     initStars();
     initShip();
-    initAsteroids(50);
+    initAsteroids(ASTEROID_COUNT);
     scoreInit();
 
     game->running                  = true;
@@ -52,8 +55,38 @@ extern GameState* gameInit(void) {
     game->last_frame_time          = SDL_GetTicks();
     game->ship_invincibility_timer = 0.0F;
     game->ship_hit_flash_timer     = 0.0F;
+    game->show_game_over           = false;
+    game->show_title               = true;
 
     return game;
+}
+
+/* =========================================================
+ * gameRestart
+ *
+ * Resets the whole run to its starting state without
+ * recreating the SDL window or GL context. The ship and the
+ * asteroids are torn down and rebuilt: initShip() reloads the
+ * OBJ models and initAsteroids() rebuilds every BVH, so the
+ * matching deinit calls must run first to avoid leaking the
+ * previous models, GPU textures and BVH allocations.
+ *
+ * Stars are left untouched: they are a static background and
+ * never freed during a run.
+ * ========================================================= */
+extern void gameRestart(GameState* game) {
+    deinitShip();
+    deinitAsteroids();
+
+    initShip();
+    initAsteroids(ASTEROID_COUNT);
+    scoreInit();
+
+    game->paused                   = false;
+    game->show_game_over           = false;
+    game->last_frame_time          = SDL_GetTicks();
+    game->ship_invincibility_timer = 0.0F;
+    game->ship_hit_flash_timer     = 0.0F;
 }
 
 /* =========================================================
@@ -75,6 +108,8 @@ extern void gamePollEvents(GameState* game) {
             case SDLK_n:      shipToggleScanner();    break;
             case SDLK_k:      shipLockCamera();       break;
             case SDLK_p:      game->paused = !game->paused; break;
+            case SDLK_r:      gameRestart(game);      break;
+            case SDLK_RETURN: game->show_title = false; break;
             case SDLK_F11:    toggleFullscreen(game->sdl_window); break;
             default: break;
             }
@@ -101,6 +136,9 @@ extern void gameUpdateLogic(GameState* game) {
     /* Clamp delta time to avoid physics spikes */
     if (dt < 0.001F) dt = 0.001F;
     if (dt > 0.05F)  dt = 0.05F;
+
+    /* Freeze on the title screen until the player presses ENTER */
+    if (game->show_title) return;
 
     /* Freeze everything once game is over */
     if (scoreIsGameOver()) return;
@@ -153,7 +191,13 @@ extern void gameRenderFrame(const GameState* game) {
     renderScanner();
     renderHUD(scoreGetPoints(), scoreGetLives());
 
-    if (game->paused) {
+    /* Overlays, in priority order: the title screen blocks the game at startup,
+     * game over blocks it at the end, and pause sits in between. */
+    if (game->show_title) {
+        renderTitleScreen();
+    } else if (game->show_game_over) {
+        renderGameOverScreen(scoreGetPoints(), scoreGetAsteroidsDestroyed());
+    } else if (game->paused) {
         renderPauseOverlay();
     }
 
@@ -209,7 +253,7 @@ static void handleShipCollision(GameState* game, float dt) {
 
         if (scoreIsGameOver()) {
             SDL_Log("GAME OVER");
-            game->running = false;
+            game->show_game_over = true;
         }
     }
 }
