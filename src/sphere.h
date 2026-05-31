@@ -16,6 +16,9 @@ typedef struct SphereMesh {
     int vertex_count;
     Tri *triangles;
     int triangle_count;
+
+    int south_pole_v_index;
+    int north_pole_v_index;
 } SphereMesh;
 
 extern SphereMesh generateSphere(float radius, int stacks, int sectors);

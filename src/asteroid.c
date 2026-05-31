@@ -16,12 +16,30 @@ static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
 static GLuint asteroid_texture_id = 0;
 
+static void distortVert(Vec3 *position, float height) {
+    const Vec3 normal = vec3Normalize(*position);
+    *position = vec3AddVector(*position, vec3MulScalar(normal, height));
+}
+
+static void distortSelfAndNeighbours(const SphereMesh *sphere, int v_index, float delta) {
+    const float epsilon = 0.25F;
+    int i;
+    if (delta > epsilon) {
+        const int neighbor_count = sphere->adjacents[v_index].count;
+        if (v_index != sphere->north_pole_v_index && v_index != sphere->south_pole_v_index) {
+            distortVert(&sphere->vertices[v_index], delta);
+        }
+        for (i = 0; i < neighbor_count; i++) {
+            const int neighbour = sphere->adjacents[v_index].neighbors[i];
+            distortSelfAndNeighbours(sphere, neighbour, delta / 3.0F);
+        }
+    }
+}
+
 static SphereMesh distortSphereMesh(SphereMesh sphere) {
     int i;
     for (i = 0; i < sphere.vertex_count; i++) {
-        const Vec3 normal = vec3Normalize(sphere.vertices[i]);
-        const float height_delta = randCenteredFloat() * 2.0F;
-        sphere.vertices[i] = vec3AddVector(sphere.vertices[i], vec3MulScalar(normal, height_delta));
+        distortSelfAndNeighbours(&sphere, i, randNormalizedFloat() * 3.0F);
     }
     return sphere;
 }

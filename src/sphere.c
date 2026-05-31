@@ -82,6 +82,7 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
     mesh.vertices[north].x = 0.0f;
     mesh.vertices[north].y = 0.0f;
     mesh.vertices[north].z = radius;
+    mesh.north_pole_v_index = north;
 
     /* rings */
     for (stack = 1; stack < stacks; ++stack)
@@ -105,6 +106,7 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
     mesh.vertices[south].x = 0.0f;
     mesh.vertices[south].y = 0.0f;
     mesh.vertices[south].z = -radius;
+    mesh.south_pole_v_index = south;
 
     /* top cap */
     for (sector = 0; sector < sectors; ++sector)
