@@ -2,23 +2,43 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include "sphere.h"
 
-typedef struct Tri {
-    int a, b, c;
-} Tri;
+static void addNeighbor(AdjacentTable *adj, int neighbor)
+{
+    int i;
+    for (i = 0; i < adj->count; ++i)
+    {
+        if (adj->neighbors[i] == neighbor) return;
+    }
 
-typedef struct {
-    Vec3 *vertices;
-    int vertex_count;
-    Tri *triangles;
-    int triangle_count;
-} SphereMesh;
+    if (adj->count == adj->capacity)
+    {
+        const int new_capacity = (adj->capacity == 0) ? 8 : adj->capacity * 2;
+        adj->neighbors = realloc(adj->neighbors, sizeof(int) * new_capacity);
+        adj->capacity = new_capacity;
+    }
 
-static Tri makeTri(int a, int b, int c) {
+    adj->neighbors[adj->count++] = neighbor;
+}
+
+static void addEdge(SphereMesh *mesh, int a, int b)
+{
+    addNeighbor(&mesh->adjacents[a], b);
+    addNeighbor(&mesh->adjacents[b], a);
+}
+
+static Tri makeTri(int a, int b, int c, SphereMesh* sm) {
     Tri result;
+
     result.a = a;
     result.b = b;
     result.c = c;
+
+    addEdge(sm, a, c);
+    addEdge(sm, c, b);
+    addEdge(sm, b, a);
+
     return result;
 }
 
@@ -38,11 +58,13 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
 
     mesh.vertices = NULL;
     mesh.triangles = NULL;
+    mesh.adjacents = NULL;
     mesh.vertex_count = 0;
     mesh.triangle_count = 0;
 
     mesh.vertices = malloc(sizeof(Vec3) * vertex_count);
     mesh.triangles = malloc(sizeof(Tri) * triangle_count);
+    mesh.adjacents = calloc(vertex_count, sizeof(AdjacentTable));
 
     if (!mesh.vertices || !mesh.triangles)
     {
@@ -89,7 +111,7 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
     {
         const int a = 1 + sector;
         const int b = 1 + ((sector + 1) % sectors);
-        mesh.triangles[t++] = makeTri(north, a, b);
+        mesh.triangles[t++] = makeTri(north, a, b, &mesh);
     }
 
     /* middle bands */
@@ -104,8 +126,8 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
             const int b = ring0 + next_sector;
             const int c = ring1 + sector;
             const int d = ring1 + next_sector;
-            mesh.triangles[t++] = makeTri(a, c, b);
-            mesh.triangles[t++] = makeTri(b, c, d);
+            mesh.triangles[t++] = makeTri(a, c, b, &mesh);
+            mesh.triangles[t++] = makeTri(b, c, d, &mesh);
         }
     }
 
@@ -116,7 +138,7 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
         {
             const int a = last_ring + sector;
             const int b = last_ring + ((sector + 1) % sectors);
-            mesh.triangles[t++] = makeTri(a, south, b);
+            mesh.triangles[t++] = makeTri(a, south, b, &mesh);
         }
     }
 
@@ -132,4 +154,11 @@ extern SphereMesh generateSphere(float radius, int stacks, int sectors)
 void freeSphere(SphereMesh mesh) {
     if (mesh.vertices != NULL) free(mesh.vertices);
     if (mesh.triangles != NULL) free(mesh.triangles);
+    if (mesh.adjacents != NULL) {
+        int i;
+        for (i = 0; i < mesh.vertex_count; i++) {
+            free(mesh.adjacents[i].neighbors);
+        }
+        free(mesh.adjacents);
+    }
 }
