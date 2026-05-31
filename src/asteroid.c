@@ -9,11 +9,22 @@
 
 #define MAX_ASTEROID_VELOCITY 5.0F
 #define MAX_POINTS_PER_LEAF 4
+#define ASTEROID_BASE_RADIUS 5.0F
 
 /* internal global variables */
 static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
 static GLuint asteroid_texture_id = 0;
+
+static SphereMesh distortSphereMesh(SphereMesh sphere) {
+    int i;
+    for (i = 0; i < sphere.vertex_count; i++) {
+        const Vec3 normal = vec3Normalize(sphere.vertices[i]);
+        const float height_delta = randCenteredFloat() * 2.0F;
+        sphere.vertices[i] = vec3AddVector(sphere.vertices[i], vec3MulScalar(normal, height_delta));
+    }
+    return sphere;
+}
 
 static Mesh parseSphereMesh(SphereMesh sphere) {
     Mesh result;
@@ -94,7 +105,8 @@ static Asteroid initAsteroid(void) {
     result.position = vec3MulScalar(vec3Random(), randNormalizedFloat() * INTERACTION_BOUNDS_RADIUS);
     result.velocity = vec3MulScalar(vec3Random(), MAX_ASTEROID_VELOCITY);
 
-    sphere = generateSphere(1.0F, 20, 20);
+    sphere = generateSphere(ASTEROID_BASE_RADIUS, 20, 20);
+    sphere = distortSphereMesh(sphere);
     result.mesh = resolveMiscMeshData(parseSphereMesh(sphere));
     freeSphere(sphere);
 
