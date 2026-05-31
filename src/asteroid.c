@@ -3,11 +3,11 @@
 #include "render.h"
 #include "utils.h"
 #include <GL/gl.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "sphere.h"
 
-#define MAX_ASTEROID_VELOCITY 5.0F 
+#define MAX_ASTEROID_VELOCITY 5.0F
 #define MAX_POINTS_PER_LEAF 4
 
 /* internal global variables */
@@ -15,87 +15,16 @@ static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
 static GLuint asteroid_texture_id = 0;
 
-static Vec3 polarVec3(float theta, float phi) {
-    Vec3 result;
-    result.x = sin(theta) * cos(phi);
-    result.y = cos(theta);
-    result.z = sin(theta) * sin(phi);
-    return result;
-}
-
-static Vertex makeSphereVertex(float theta, float phi) {
-    Vertex result;
-    result.position = polarVec3(theta, phi);
-    return result;
-}
-
-static void appendTriangle(TriangleFace* faces, int* index, Vertex v0, Vertex v1, Vertex v2) {
-    faces[*index].v[0] = v0;
-    faces[*index].v[1] = v1;
-    faces[*index].v[2] = v2;
-    (*index)++;
-}
-
-static Mesh generateSphereMesh(int stacks, int sections) {
+static Mesh parseSphereMesh(SphereMesh sphere) {
     Mesh result;
+    int i;
 
-    int f = 0;
-    int i = 0;
-    int j = 0;
-
-    float theta_step = PI / stacks;
-    float phi_step = 2.0F * (float)PI / (float)sections;
-
-    result.face_count = 2 * sections * stacks;
-    result.faces = (TriangleFace*)malloc(result.face_count * sizeof(TriangleFace));
-
-    for (i = 0; i <= stacks; i++) {
-        float theta1 = (float)i * theta_step;
-        float theta2 = (float)(i + 1) * theta_step;
-
-        /* north pole case */
-        if (i == 0) {
-            const Vertex north_pole = makeSphereVertex(0.0F, 0.0F);
-
-            for (j = 0; j < sections; j++) {
-                const float phi1 = (float)j * phi_step;
-                const float phi2 = (float)(j + 1) * phi_step;
-
-                const Vertex v1 = makeSphereVertex(theta2, phi1);
-                const Vertex v2 = makeSphereVertex(theta2, phi2);
-
-                appendTriangle(result.faces, &f, v1, north_pole, v2);
-            }
-        }
-        /* south pole case */
-        else if (i == stacks) {
-            const Vertex south_pole = makeSphereVertex(PI, 0.0F);
-
-            for (j = 0; j < sections; j++) {
-                const float phi1 = (float)j * phi_step;
-                const float phi2 = (float)(j + 1) * phi_step;
-
-                const Vertex v1 = makeSphereVertex(theta1, phi1);
-                const Vertex v2 = makeSphereVertex(theta1, phi2);
-
-                appendTriangle(result.faces, &f, v1, south_pole, v2);
-            }
-        }
-        /* middle stack cases */
-        else {
-            for (j = 0; j < sections; j++) {
-                const float phi1 = (float)j * phi_step;
-                const float phi2 = (float)(j + 1) * phi_step;
-
-                const Vertex v00 = makeSphereVertex(theta1, phi1);
-                const Vertex v01 = makeSphereVertex(theta1, phi2);
-                const Vertex v10 = makeSphereVertex(theta2, phi1);
-                const Vertex v11 = makeSphereVertex(theta2, phi2);
-
-                appendTriangle(result.faces, &f, v00, v01, v10);
-                appendTriangle(result.faces, &f, v11, v10, v01);
-            }
-        }
+    result.faces = malloc(sphere.triangle_count * sizeof(TriangleFace));
+    result.face_count = sphere.triangle_count;
+    for (i = 0; i < sphere.triangle_count; i++) {
+        result.faces[i].v[0].position = sphere.vertices[sphere.triangles[i].a];
+        result.faces[i].v[1].position = sphere.vertices[sphere.triangles[i].b];
+        result.faces[i].v[2].position = sphere.vertices[sphere.triangles[i].c];
     }
 
     return result;
@@ -159,12 +88,16 @@ static int* generateBvhIndices(int count) {
 
 static Asteroid initAsteroid(void) {
     Asteroid result;
+    SphereMesh sphere;
 
     result.mass = 1.0F;
     result.position = vec3MulScalar(vec3Random(), randNormalizedFloat() * INTERACTION_BOUNDS_RADIUS);
     result.velocity = vec3MulScalar(vec3Random(), MAX_ASTEROID_VELOCITY);
 
-    result.mesh = resolveMiscMeshData(generateSphereMesh(20, 20));
+    sphere = generateSphere(1.0F, 20, 20);
+    result.mesh = resolveMiscMeshData(parseSphereMesh(sphere));
+    freeSphere(sphere);
+
     result.texture_id = asteroid_texture_id;
 
     result.barycenter_array = generateBarycenters(result.mesh, result.position);

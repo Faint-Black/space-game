@@ -1,0 +1,16 @@
+#include "utils.h"
+
+typedef struct Tri {
+    int a, b, c;
+} Tri;
+
+typedef struct {
+    Vec3 *vertices;
+    int vertex_count;
+    Tri *triangles;
+    int triangle_count;
+} SphereMesh;
+
+extern SphereMesh generateSphere(float radius, int stacks, int sectors);
+
+extern void freeSphere(SphereMesh mesh);
