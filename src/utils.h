@@ -5,7 +5,7 @@
 
 /* Defines the playable area sphere with a radius of 1 kilometer,
    the player and other entities must never cross it */
-#define INTERACTION_BOUNDS_RADIUS 1000.0F
+#define INTERACTION_BOUNDS_RADIUS 2000.0F
 
 typedef struct Vec3 {
     float x;

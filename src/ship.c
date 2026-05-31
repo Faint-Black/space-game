@@ -312,7 +312,7 @@ extern void shipSetupCamera(int windowW, int windowH) {
     /* Projection */
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (double)aspect, 0.5, 600.0);
+    gluPerspective(60.0, (double)aspect, 0.5, INTERACTION_BOUNDS_RADIUS * 2.0F);
 
     /* Modelview / camera */
     glMatrixMode(GL_MODELVIEW);
