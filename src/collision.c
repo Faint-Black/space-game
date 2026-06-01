@@ -16,8 +16,8 @@
 #define BODY_LOCAL_MAX_X ( 2.3F)
 #define BODY_LOCAL_MIN_Y (-1.2F)
 #define BODY_LOCAL_MAX_Y ( 1.5F)
-#define BODY_LOCAL_MIN_Z (-2.0F)
-#define BODY_LOCAL_MAX_Z ( 3.5F)
+#define BODY_LOCAL_MIN_Z (-3.0F)
+#define BODY_LOCAL_MAX_Z ( 4.5F)
 
 #define CLAW_SHOULDER_Y (-1.8F)
 #define CLAW_SHOULDER_Z (-3.0F)

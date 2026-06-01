@@ -19,12 +19,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-/*
- * How long the ship stays invincible after taking damage (seconds).
- * Prevents checkCollision() from draining all lives in a single overlap.
- */
-#define SHIP_INVINCIBILITY_DURATION 1.0F
-
 /* Duration of the red screen flash after taking damage (seconds). */
 #define HIT_FLASH_DURATION 0.3F
 
@@ -241,8 +235,7 @@ static void handleShipCollision(GameState* game, float dt) {
     if (checkCollision(getShipPosition())) {
         scoreLoseLife();
 
-        /* Start invincibility and visual flash */
-        game->ship_invincibility_timer = SHIP_INVINCIBILITY_DURATION;
+        /* Start visual flash */
         game->ship_hit_flash_timer     = HIT_FLASH_DURATION;
 
         SDL_Log("COLLISION: ship hit! Lives remaining: %d", scoreGetLives());
