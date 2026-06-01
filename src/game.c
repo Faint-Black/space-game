@@ -32,7 +32,7 @@
 #define CLAW_GRAB_COOLDOWN 0.5F
 
 /* Number of asteroids spawned at the start of a run and on every restart. */
-#define ASTEROID_COUNT 50
+#define ASTEROID_COUNT 75
 
 static int  initializeSDLandOpenGL(GameState* game);
 static void deinitializeSDLandOpenGL(GameState* game);
