@@ -22,18 +22,6 @@ static Ship global_ship;
 static int keys[512];
 
 /* ======================================================================== */
-/*  Interface functions                                                       */
-/* ======================================================================== */
-
-extern Vec3 getShipPosition() {
-    return global_ship.position;
-}
-
-extern Vec3 getShipForward() {
-    return global_ship.forward;
-}
-
-/* ======================================================================== */
 /*  Initialization / Deinitialization                                         */
 /* ======================================================================== */
 
@@ -552,9 +540,29 @@ extern void renderScanner() {
     glPopMatrix();
 }
 /* ======================================================================== */
-/*  Projectile accessor                                                     */
+/*  accessor                                                     */
 /* ======================================================================== */
 
 extern const Projectile* getProjectiles(void) {
     return global_ship.projectiles;
+}
+
+extern Vec3 getShipPosition() {
+    return global_ship.position;
+}
+
+extern Vec3 getShipForward() {
+    return global_ship.forward;
+}
+
+extern Vec3 getShipUp() {
+    return global_ship.up;
+}
+
+extern Vec3 getShipRight() {
+    return global_ship.right;
+}
+
+extern int getShipArmExtended() {
+    return global_ship.armExtended;
 }

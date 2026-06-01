@@ -185,31 +185,27 @@ extern void debugRenderAsteroidLeafBVHs(void) {
     }
 }
 
-static void debugReconstructAxes(Vec3 fwd, Vec3* out_right, Vec3* out_up) {
-    Vec3 helper, right;
-    float fy = fwd.y < 0.0F ? -fwd.y : fwd.y;
-    if (fy < 0.9F) { helper.x = 0.0F; helper.y = 1.0F; helper.z = 0.0F; }
-    else           { helper.x = 1.0F; helper.y = 0.0F; helper.z = 0.0F; }
-    right      = vec3Normalize(vec3Cross(helper, fwd));
-    *out_right = right;
-    *out_up    = vec3Cross(fwd, right);
-}
 
 static AABB debugBuildShipAABB(Vec3 pos, Vec3 fwd, Vec3 up, Vec3 right) {
-    static const float lx[2] = { -2.3F, 2.3F };
-    static const float ly[2] = { -2.1F, 1.1F };
-    static const float lz[2] = { -3.3F, 2.3F };
+    static const float lx[2] = { -2.3F,  2.3F };
+    static const float ly[2] = { -1.2F,  1.5F };
+    static const float lz[2] = { -2.0F,  3.5F };
     AABB box;
     int ix, iy, iz, first = 1;
-    for (ix = 0; ix < 2; ix++)
-        for (iy = 0; iy < 2; iy++)
+
+    for (ix = 0; ix < 2; ix++) {
+        for (iy = 0; iy < 2; iy++) {
             for (iz = 0; iz < 2; iz++) {
                 Vec3 c;
                 c.x = pos.x + right.x*lx[ix] + up.x*ly[iy] + fwd.x*lz[iz];
                 c.y = pos.y + right.y*lx[ix] + up.y*ly[iy] + fwd.y*lz[iz];
                 c.z = pos.z + right.z*lx[ix] + up.z*ly[iy] + fwd.z*lz[iz];
-                if (first) { box.min = c; box.max = c; first = 0; }
-                else {
+
+                if (first) {
+                    box.min = c;
+                    box.max = c;
+                    first = 0;
+                } else {
                     if (c.x < box.min.x) box.min.x = c.x;
                     if (c.y < box.min.y) box.min.y = c.y;
                     if (c.z < box.min.z) box.min.z = c.z;
@@ -218,18 +214,24 @@ static AABB debugBuildShipAABB(Vec3 pos, Vec3 fwd, Vec3 up, Vec3 right) {
                     if (c.z > box.max.z) box.max.z = c.z;
                 }
             }
+        }
+    }
     return box;
 }
 
 static void debugRenderLeafBVHCollision(const BVHNode* node, AABB ship_box) {
     const Vec3 yellow = { 1.0F, 1.0F, 0.0F };
     const Vec3 red    = { 1.0F, 0.0F, 0.0F };
-    if (node == NULL) return;
+
+    if (node == NULL) {
+        return;
+    }
     if (bvhNodeIsLeaf(node)) {
-        if (aabbVsAABB(ship_box, node->aabb))
+        if (aabbVsAABB(ship_box, node->aabb)) {
             debugRenderAABB(node->aabb, yellow);
-        else
+        } else {
             debugRenderAABB(node->aabb, red);
+        }
         return;
     }
     debugRenderLeafBVHCollision(node->left,  ship_box);
@@ -237,17 +239,27 @@ static void debugRenderLeafBVHCollision(const BVHNode* node, AABB ship_box) {
 }
 
 extern void debugRenderAsteroidCollisions(void) {
-    Vec3 pos, fwd, up, right;
+    Vec3 pos = getShipPosition();
+    Vec3 fwd  = getShipForward();
+    Vec3 up   = getShipUp();
+    Vec3 right = getShipRight();
     AABB ship_box;
     int i;
 
-    pos = getShipPosition();
-    fwd = getShipForward();
-    debugReconstructAxes(fwd, &right, &up);
     ship_box = debugBuildShipAABB(pos, fwd, up, right);
 
+    glDisable(GL_LIGHTING);
+    glLineWidth(1.5F);
+
+    /* Draw ship body AABB in green */
+    debugRenderAABB(ship_box, vec3(0.0F, 1.0F, 0.0F));
+
+    /* Draw each asteroid's leaf BVH nodes coloured by collision state */
     for (i = 0; i < getAsteroidCount(); i++) {
         const Asteroid asteroid = getAsteroids()[i];
         debugRenderLeafBVHCollision(asteroid.bvh, ship_box);
     }
+
+    glLineWidth(1.0F);
+    glEnable(GL_LIGHTING);
 }

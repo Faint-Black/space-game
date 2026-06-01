@@ -26,33 +26,11 @@ typedef struct GameState {
     bool          running;
     bool          paused;
     Uint32        last_frame_time;
-
-    /*
-     * ship_invincibility_timer
-     *   Seconds of invincibility remaining after the ship takes damage.
-     *   Without this, checkCollision() would fire scoreLoseLife() ~60 times
-     *   per second while the ship overlaps an asteroid.
-     *
-     * ship_hit_flash_timer
-     *   Seconds remaining for the red screen flash (visual damage feedback).
-     */
     float ship_invincibility_timer;
     float ship_hit_flash_timer;
-
-    /*
-     * show_game_over
-     *   Raised when the player runs out of lives. The window stays open and
-     *   the game-over screen is drawn instead of closing the program, so the
-     *   player can read the final score and restart with R.
-     */
     bool  show_game_over;
-
-    /*
-     * show_title
-     *   Raised at startup so the title screen is shown and the simulation is
-     *   frozen until the player presses ENTER to begin.
-     */
     bool  show_title;
+    float claw_grab_cooldown;
 } GameState;
 
 extern GameState* gameInit(void);

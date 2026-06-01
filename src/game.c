@@ -28,6 +28,9 @@
 /* Duration of the red screen flash after taking damage (seconds). */
 #define HIT_FLASH_DURATION 0.3F
 
+/* How long before the claw can score again after grabbing an asteroid. */
+#define CLAW_GRAB_COOLDOWN 0.5F
+
 /* Number of asteroids spawned at the start of a run and on every restart. */
 #define ASTEROID_COUNT 50
 
@@ -36,6 +39,7 @@ static void deinitializeSDLandOpenGL(GameState* game);
 static void setupLighting(void);
 static void handleShipCollision(GameState* game, float dt);
 static void handleProjectileCollisions(void);
+static void handleClawCollision(GameState* game, float dt);
 static void toggleFullscreen(SDL_Window* window);
 
 /* =========================================================
@@ -57,6 +61,7 @@ extern GameState* gameInit(void) {
     game->ship_hit_flash_timer     = 0.0F;
     game->show_game_over           = false;
     game->show_title               = true;
+    game->claw_grab_cooldown       = 0.0F;
 
     return game;
 }
@@ -87,6 +92,7 @@ extern void gameRestart(GameState* game) {
     game->last_frame_time          = SDL_GetTicks();
     game->ship_invincibility_timer = 0.0F;
     game->ship_hit_flash_timer     = 0.0F;
+    game->claw_grab_cooldown       = 0.0F;
 }
 
 /* =========================================================
@@ -155,6 +161,9 @@ extern void gameUpdateLogic(GameState* game) {
 
     /* Projectile vs asteroid collision */
     handleProjectileCollisions();
+
+    /* Claw vs asteroid collision */
+    handleClawCollision(game, dt);
 }
 
 /* =========================================================
@@ -213,19 +222,6 @@ extern void gameDeinit(GameState* game) {
     deinitializeSDLandOpenGL(game);
 }
 
-/* =========================================================
- * handleShipCollision  (private)
- *
- * Problem being solved:
- *   checkCollision() returns 1 on every frame the ship overlaps
- *   an asteroid. Without a cooldown, scoreLoseLife() would be
- *   called ~60 times per second, draining all lives instantly.
- *
- * Solution:
- *   After taking damage the ship becomes invincible for
- *   SHIP_INVINCIBILITY_DURATION seconds. Only then can a new
- *   collision register a life loss.
- * ========================================================= */
 static void handleShipCollision(GameState* game, float dt) {
     /* Count down both timers every frame */
     if (game->ship_invincibility_timer > 0.0F) {
@@ -255,43 +251,6 @@ static void handleShipCollision(GameState* game, float dt) {
             SDL_Log("GAME OVER");
             game->show_game_over = true;
         }
-    }
-}
-
-/* =========================================================
- * handleProjectileCollisions  (private)
- *
- * Calls checkProjectileCollision() in a loop until no more
- * hits remain in this frame (multiple projectiles may hit
- * different asteroids on the same frame).
- *
- * Uses getProjectiles() from ship.c to read projectile state.
- * MAX_PROJECTILES caps the loop to prevent infinite iteration.
- * ========================================================= */
-static void handleProjectileCollisions(void) {
-    int ast_idx  = -1;
-    int proj_idx = -1;
-    int max_iter = MAX_PROJECTILES;
-    const Projectile* projs = getProjectiles();
-
-    while (max_iter-- > 0 &&
-           checkProjectileCollision(&ast_idx, &proj_idx)) {
-
-        /* Deactivate the projectile that hit */
-        if (proj_idx >= 0 && proj_idx < MAX_PROJECTILES) {
-            /* Cast away const: we own the underlying array via ship.c */
-            ((Projectile*)projs)[proj_idx].active = 0;
-            ((Projectile*)projs)[proj_idx].life   = 0.0F;
-        }
-
-        /* Award points */
-        scoreAddAsteroidDestroyed();
-
-        SDL_Log("COLLISION: projectile %d hit asteroid %d",
-                proj_idx, ast_idx);
-
-        ast_idx  = -1;
-        proj_idx = -1;
     }
 }
 
@@ -366,14 +325,47 @@ static void setupLighting(void) {
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 }
 
-/* =========================================================
- * toggleFullscreen  (private)
- *
- * Switches the SDL window between borderless desktop-fullscreen
- * and windowed mode. Borderless desktop is used (not exclusive
- * fullscreen) so the OS resolution is reused and alt-tabbing
- * stays smooth.
- * ========================================================= */
+static void handleProjectileCollisions(void) {
+    int ast_idx  = -1;
+    int proj_idx = -1;
+    int max_iter = MAX_PROJECTILES;
+    const Projectile* projs = getProjectiles();
+
+    while (max_iter-- > 0 &&
+           checkProjectileCollision(&ast_idx, &proj_idx)) {
+
+        if (proj_idx >= 0 && proj_idx < MAX_PROJECTILES) {
+            ((Projectile*)projs)[proj_idx].active = 0;
+            ((Projectile*)projs)[proj_idx].life   = 0.0F;
+        }
+
+        scoreAddAsteroidDestroyed();
+
+        SDL_Log("COLLISION: projectile %d hit asteroid %d", proj_idx, ast_idx);
+
+        ast_idx  = -1;
+        proj_idx = -1;
+    }
+}
+
+static void handleClawCollision(GameState* game, float dt) {
+    int ast_idx;
+
+    if (game->claw_grab_cooldown > 0.0F) {
+        game->claw_grab_cooldown -= dt;
+        if (game->claw_grab_cooldown < 0.0F)
+            game->claw_grab_cooldown = 0.0F;
+        return;
+    }
+
+    ast_idx = checkClawCollision();
+    if (ast_idx >= 0) {
+        scoreAddAsteroidDestroyed();
+        game->claw_grab_cooldown = CLAW_GRAB_COOLDOWN;
+        SDL_Log("CLAW: grabbed asteroid %d, score: %d", ast_idx, scoreGetPoints());
+    }
+}
+
 static void toggleFullscreen(SDL_Window* window) {
     Uint32 flags = SDL_GetWindowFlags(window);
     if ((flags & SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
