@@ -22,7 +22,16 @@ typedef struct Asteroid {
     float mass;
     Vec3 position;
     Vec3 velocity;
+    int hit_points;
 } Asteroid;
+
+typedef struct ExplosionParticle {
+    Vec3  position;
+    Vec3  velocity;
+    Vec3  color;
+    float lifetime;     
+    float max_lifetime; 
+} ExplosionParticle;
 
 /**
  * @brief Initializes internal state of asteroids. Must be called once before game begins.
@@ -53,5 +62,35 @@ extern const Asteroid* getAsteroids(void);
  * @return Asteroid array length.
  */
 extern int getAsteroidCount(void);
+
+/**
+ * @brief Destroys the asteroid at the given index and immediately respawns it
+ *        at a new random position within the interaction bounds.
+ *        Also emits an explosion particle burst at the asteroid's position.
+ *
+ * @param asteroid_id Index of the asteroid to destroy (0-based).
+ */
+extern void destroyAsteroid(int asteroid_id);
+
+/**
+ * @brief Applies one point of damage to the asteroid at the given index.
+ *        When its hit-points reach zero, destroyAsteroid() is called
+ *        automatically, respawning the asteroid at a new random location.
+ *
+ * @param asteroid_id Index of the asteroid to damage (0-based).
+ */
+extern void damageAsteroid(int asteroid_id);
+
+/**
+ * @brief Returns a read-only pointer to the explosion particle pool.
+ *        Intended for use by render.c only.
+ */
+extern const ExplosionParticle* getExplosionParticles(void);
+
+/**
+ * @brief Returns the capacity of the explosion particle pool.
+ *        Intended for use by render.c only.
+ */
+extern int getExplosionParticleCapacity(void);
 
 #endif /* ASTEROID_H */

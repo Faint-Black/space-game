@@ -66,4 +66,10 @@ extern void debugRenderAsteroidLeafBVHs(void);
  */
 extern void debugRenderAsteroidCollisions(void);
 
+/**
+ * @brief Renders all currently live explosion particles as fading colored sparks.
+ *        Called automatically by renderAsteroids() — no need to call manually.
+ */
+extern void renderExplosionParticles(void);
+
 #endif /* RENDER_H */

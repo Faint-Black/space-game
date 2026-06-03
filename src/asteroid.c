@@ -10,11 +10,22 @@
 #define MAX_ASTEROID_VELOCITY 5.0F
 #define MAX_POINTS_PER_LEAF 4
 #define ASTEROID_BASE_RADIUS 5.0F
+#define MIN_HIT_POINTS 2
+#define MAX_HIT_POINTS 5
+
+#define PARTICLES_PER_EXPLOSION 48
+#define PARTICLE_POOL_SIZE 256
+#define PARTICLE_LIFETIME 1.2F
+#define PARTICLE_MIN_SPEED 3.0F
+#define PARTICLE_MAX_SPEED 18.0F
 
 /* internal global variables */
 static Asteroid* asteroid_array = NULL;
 static int asteroid_count = 0;
 static GLuint asteroid_texture_id = 0;
+
+static ExplosionParticle particle_pool[PARTICLE_POOL_SIZE];
+static int particle_pool_next = 0;
 
 static void distortVert(Vec3 *position, float height) {
     const Vec3 normal = vec3Normalize(*position);
@@ -137,6 +148,9 @@ static Asteroid initAsteroid(void) {
     result.bvh_index_array = generateBvhIndices(result.bvh_index_count);
     result.bvh = bvhBuild(result.barycenter_array, result.bvh_index_array, result.bvh_index_count, MAX_POINTS_PER_LEAF);
 
+    result.hit_points = MIN_HIT_POINTS + (int)(randNormalizedFloat() * (float)(MAX_HIT_POINTS - MIN_HIT_POINTS + 1));
+    if (result.hit_points > MAX_HIT_POINTS) result.hit_points = MAX_HIT_POINTS;
+
     return result;
 }
 
@@ -153,6 +167,28 @@ static void deinitAsteroid(Asteroid asteroid) {
     }
     if (asteroid.bvh != NULL) {
         bvhFree(asteroid.bvh);
+    }
+}
+
+
+static void emitExplosion(Vec3 origin) {
+    int i;
+    for (i = 0; i < PARTICLES_PER_EXPLOSION; i++) {
+        ExplosionParticle* p = &particle_pool[particle_pool_next];
+        const float speed = randRangedFloat(PARTICLE_MIN_SPEED, PARTICLE_MAX_SPEED);
+
+        p->position     = origin;
+        p->velocity     = vec3MulScalar(vec3Random(), speed);
+        p->lifetime     = PARTICLE_LIFETIME;
+        p->max_lifetime = PARTICLE_LIFETIME;
+
+        p->color = vec3(
+            1.0F,
+            randRangedFloat(0.4F, 1.0F),
+            randRangedFloat(0.0F, 0.3F)
+        );
+
+        particle_pool_next = (particle_pool_next + 1) % PARTICLE_POOL_SIZE;
     }
 }
 
@@ -178,6 +214,18 @@ extern void updateAsteroids(float dt) {
     int i;
     for (i = 0; i < asteroid_count; i++) {
         updateAsteroid(&asteroid_array[i], dt);
+
+        if (vec3Magnitude(asteroid_array[i].position) > INTERACTION_BOUNDS_RADIUS) {
+            destroyAsteroid(i);
+        }
+    }
+
+    for (i = 0; i < PARTICLE_POOL_SIZE; i++) {
+        ExplosionParticle* p = &particle_pool[i];
+        if (p->lifetime <= 0.0F) continue;
+        p->position = vec3AddVector(p->position, vec3MulScalar(p->velocity, dt));
+        p->lifetime -= dt;
+        if (p->lifetime < 0.0F) p->lifetime = 0.0F;
     }
 }
 
@@ -208,4 +256,38 @@ extern const Asteroid* getAsteroids(void) {
 
 extern int getAsteroidCount(void) {
     return asteroid_count;
+}
+
+
+extern void destroyAsteroid(int asteroid_id) {
+    if (asteroid_id < 0 || asteroid_id >= asteroid_count) {
+        return;
+    }
+
+    emitExplosion(asteroid_array[asteroid_id].position);
+
+    deinitAsteroid(asteroid_array[asteroid_id]);
+
+    asteroid_array[asteroid_id] = initAsteroid();
+}
+
+
+extern void damageAsteroid(int asteroid_id) {
+    if (asteroid_id < 0 || asteroid_id >= asteroid_count) {
+        return;
+    }
+
+    asteroid_array[asteroid_id].hit_points--;
+
+    if (asteroid_array[asteroid_id].hit_points <= 0) {
+        destroyAsteroid(asteroid_id);
+    }
+}
+
+extern const ExplosionParticle* getExplosionParticles(void) {
+    return particle_pool;
+}
+
+extern int getExplosionParticleCapacity(void) {
+    return PARTICLE_POOL_SIZE;
 }

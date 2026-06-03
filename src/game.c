@@ -332,6 +332,7 @@ static void handleProjectileCollisions(void) {
             ((Projectile*)projs)[proj_idx].life   = 0.0F;
         }
 
+        damageAsteroid(ast_idx);
         scoreAddAsteroidDestroyed();
 
         SDL_Log("COLLISION: projectile %d hit asteroid %d", proj_idx, ast_idx);

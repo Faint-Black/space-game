@@ -86,6 +86,8 @@ extern void renderAsteroids(void) {
         }
         glPopMatrix();
     }
+
+    renderExplosionParticles();
 }
 
 extern void debugRenderPoints(Vec3* points, int count) {
@@ -262,4 +264,52 @@ extern void debugRenderAsteroidCollisions(void) {
 
     glLineWidth(1.0F);
     glEnable(GL_LIGHTING);
+}
+
+
+extern void renderExplosionParticles(void) {
+    const ExplosionParticle* particles = getExplosionParticles();
+    const int capacity = getExplosionParticleCapacity();
+    GLfloat saved_color[4];
+    GLfloat saved_point_size;
+    GLboolean blend_was_enabled;
+    GLboolean light_was_enabled;
+    int i;
+
+    {
+        int any_live = 0;
+        for (i = 0; i < capacity; i++) {
+            if (particles[i].lifetime > 0.0F) { any_live = 1; break; }
+        }
+        if (!any_live) return;
+    }
+
+    glGetFloatv(GL_CURRENT_COLOR, saved_color);
+    glGetFloatv(GL_POINT_SIZE,    &saved_point_size);
+    blend_was_enabled = glIsEnabled(GL_BLEND);
+    light_was_enabled = glIsEnabled(GL_LIGHTING);
+
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPointSize(3.0F);
+
+    glBegin(GL_POINTS);
+    for (i = 0; i < capacity; i++) {
+        const ExplosionParticle* p = &particles[i];
+        float alpha;
+
+        if (p->lifetime <= 0.0F) continue;
+
+        alpha = p->lifetime / p->max_lifetime;
+
+        glColor4f(p->color.x, p->color.y, p->color.z, alpha);
+        glVertex3f(p->position.x, p->position.y, p->position.z);
+    }
+    glEnd();
+
+    glColor4fv(saved_color);
+    glPointSize(saved_point_size);
+    if (!blend_was_enabled) glDisable(GL_BLEND);
+    if (light_was_enabled)  glEnable(GL_LIGHTING);
 }
