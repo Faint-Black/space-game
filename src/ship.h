@@ -1,6 +1,7 @@
 #ifndef SHIP_H
 #define SHIP_H
 
+#include "aabb_bvh.h"
 #include "objloader.h"
 #include "utils.h"
 
@@ -68,6 +69,13 @@ typedef struct Ship {
 
     /* State */
     int thrusting;
+
+    BVHNode* bvh;
+    Vec3* barycenter_local;
+    Vec3* barycenter_world;
+    int barycenter_count;
+    int* bvh_index_array;
+    int bvh_index_count;
 } Ship;
 
 extern void initShip();
@@ -87,6 +95,8 @@ extern Vec3 getShipRight();
 
 /** @brief Returns 1 if the mechanical arm is currently extended, 0 otherwise. */
 extern int getShipArmExtended();
+
+extern const BVHNode* getShipBVH(void);
 
 extern void updateShip(float dt);
 extern void shipKeyDown(int key);

@@ -160,17 +160,64 @@ static int bvhSphereQuery(const BVHNode* node, const Vec3* points, Vec3 center, 
     return 0;
 }
 
+static int bvhVsBvh(const BVHNode* a, const BVHNode* b) {
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+    if (!aabbVsAABB(a->aabb, b->aabb)) {
+        return 0;
+    }
+    if (bvhNodeIsLeaf(a) && bvhNodeIsLeaf(b)) {
+        return 1;
+    }
+    if (bvhNodeIsLeaf(a)) {
+        if (bvhVsBvh(a, b->left)) {
+            return 1;
+        }
+        if (bvhVsBvh(a, b->right)) {
+            return 1;
+        }
+        return 0;
+    }
+    if (bvhNodeIsLeaf(b)) {
+        if (bvhVsBvh(a->left, b)) {
+            return 1;
+        }
+        if (bvhVsBvh(a->right, b)) {
+            return 1;
+        }
+        return 0;
+    }
+    if (bvhVsBvh(a->left, b->left)) {
+        return 1;
+    }
+    if (bvhVsBvh(a->left, b->right)) {
+        return 1;
+    }
+    if (bvhVsBvh(a->right, b->left)) {
+        return 1;
+    }
+    if (bvhVsBvh(a->right, b->right)) {
+        return 1;
+    }
+    return 0;
+}
+
 /* =========================================================
  * checkCollision  —  ship BODY vs asteroids (causes DAMAGE)
  * ========================================================= */
 extern int checkCollision(Vec3 ship_pos) {
     const Asteroid* asteroids = getAsteroids();
     const int count = getAsteroidCount();
+    const BVHNode* ship_bvh = getShipBVH();
     AABB ship_box;
     Vec3 fwd, up, right;
     int i;
     
     if (!asteroids || count <= 0) {
+        return 0;
+    }
+    if (ship_bvh == NULL) {
         return 0;
     }
     
@@ -192,7 +239,10 @@ extern int checkCollision(Vec3 ship_pos) {
         if (!aabbVsAABB(ship_box, ast->bvh->aabb)){
             continue;
         }
-        if (aabbVsAsteroidBVH(ship_box, ast->bvh)) {
+        if (!aabbVsAsteroidBVH(ship_box, ast->bvh)) {
+            continue;
+        }
+        if (bvhVsBvh(ship_bvh, ast->bvh)) {
             return i + 1;
         }
     }

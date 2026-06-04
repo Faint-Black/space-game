@@ -1,16 +1,20 @@
 #include "ship.h"
 #include "objloader.h"
 #include "utils.h"
+#include "aabb_bvh.h"
 
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+#define SHIP_MAX_POINTS_PER_LEAF 4
 
 /* ======================================================================== */
 /*  Global ship instance                                                     */
@@ -20,6 +24,95 @@ static Ship global_ship;
 
 /* Key state arrays */
 static int keys[512];
+
+static Vec3 shipModelToWorld(Vec3 local) {
+    Vec3 result;
+    result.x = global_ship.position.x - local.x * global_ship.right.x + local.y * global_ship.up.x + local.z * global_ship.forward.x;
+    result.y = global_ship.position.y - local.x * global_ship.right.y + local.y * global_ship.up.y + local.z * global_ship.forward.y;
+    result.z = global_ship.position.z - local.x * global_ship.right.z + local.y * global_ship.up.z + local.z * global_ship.forward.z;
+    return result;
+}
+
+static int countShipFaces(const OBJModel* model) {
+    int i;
+    int total = 0;
+    if (model == NULL) {
+        return 0;
+    }
+    for (i = 0; i < model->materialCount; i++) {
+        total += model->materials[i].faceCount;
+    }
+    return total;
+}
+
+static Vec3* generateShipBarycenters(const OBJModel* model, int count) {
+    Vec3* points = malloc(count * sizeof(Vec3));
+    int m;
+    int f;
+    int idx = 0;
+    for (m = 0; m < model->materialCount; m++) {
+        const MaterialGroup* group = &model->materials[m];
+        for (f = 0; f < group->faceCount; f++) {
+            const Vec3 v1 = group->faces[f].v[0].position;
+            const Vec3 v2 = group->faces[f].v[1].position;
+            const Vec3 v3 = group->faces[f].v[2].position;
+            points[idx] = vec3BarycenterTri(v1, v2, v3);
+            idx++;
+        }
+    }
+    return points;
+}
+
+static int* generateShipBvhIndices(int count) {
+    int* result = malloc(count * sizeof(int));
+    int i;
+    for (i = 0; i < count; i++) {
+        result[i] = i;
+    }
+    return result;
+}
+
+static void buildShipBVH(void) {
+    int i;
+
+    global_ship.bvh = NULL;
+    global_ship.barycenter_local = NULL;
+    global_ship.barycenter_world = NULL;
+    global_ship.barycenter_count = 0;
+    global_ship.bvh_index_array = NULL;
+    global_ship.bvh_index_count = 0;
+
+    if (global_ship.model == NULL) {
+        return;
+    }
+
+    global_ship.barycenter_count = countShipFaces(global_ship.model);
+    if (global_ship.barycenter_count <= 0) {
+        global_ship.barycenter_count = 0;
+        return;
+    }
+
+    global_ship.barycenter_local = generateShipBarycenters(global_ship.model, global_ship.barycenter_count);
+    global_ship.barycenter_world = malloc(global_ship.barycenter_count * sizeof(Vec3));
+    for (i = 0; i < global_ship.barycenter_count; i++) {
+        global_ship.barycenter_world[i] = shipModelToWorld(global_ship.barycenter_local[i]);
+    }
+
+    global_ship.bvh_index_count = global_ship.barycenter_count;
+    global_ship.bvh_index_array = generateShipBvhIndices(global_ship.bvh_index_count);
+    global_ship.bvh = bvhBuild(global_ship.barycenter_world, global_ship.bvh_index_array, global_ship.bvh_index_count, SHIP_MAX_POINTS_PER_LEAF);
+}
+
+static void refitShipBVH(void) {
+    int i;
+    if (global_ship.bvh == NULL || global_ship.barycenter_world == NULL) {
+        return;
+    }
+    for (i = 0; i < global_ship.barycenter_count; i++) {
+        global_ship.barycenter_world[i] = shipModelToWorld(global_ship.barycenter_local[i]);
+    }
+    bvhRefit(global_ship.bvh, global_ship.barycenter_world);
+}
 
 /* ======================================================================== */
 /*  Initialization / Deinitialization                                         */
@@ -84,6 +177,8 @@ extern void initShip() {
     if (global_ship.armModel == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load arm model!");
     }
+
+    buildShipBVH();
 }
 
 extern void deinitShip() {
@@ -95,6 +190,24 @@ extern void deinitShip() {
         freeOBJModel(global_ship.armModel);
         global_ship.armModel = NULL;
     }
+    if (global_ship.bvh != NULL) {
+        bvhFree(global_ship.bvh);
+        global_ship.bvh = NULL;
+    }
+    if (global_ship.barycenter_local != NULL) {
+        free(global_ship.barycenter_local);
+        global_ship.barycenter_local = NULL;
+    }
+    if (global_ship.barycenter_world != NULL) {
+        free(global_ship.barycenter_world);
+        global_ship.barycenter_world = NULL;
+    }
+    if (global_ship.bvh_index_array != NULL) {
+        free(global_ship.bvh_index_array);
+        global_ship.bvh_index_array = NULL;
+    }
+    global_ship.barycenter_count = 0;
+    global_ship.bvh_index_count = 0;
 }
 
 /* ======================================================================== */
@@ -284,6 +397,8 @@ extern void updateShip(float dt) {
             }
         }
     }
+
+    refitShipBVH();
 }
 
 /* ======================================================================== */
@@ -565,4 +680,8 @@ extern Vec3 getShipRight() {
 
 extern int getShipArmExtended() {
     return global_ship.armExtended;
+}
+
+extern const BVHNode* getShipBVH(void) {
+    return global_ship.bvh;
 }
