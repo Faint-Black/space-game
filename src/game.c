@@ -235,7 +235,8 @@ static void handleShipCollision(GameState* game, float dt) {
     if (checkCollision(getShipPosition())) {
         scoreLoseLife();
 
-        /* Start visual flash */
+        /* Start invincibility window and visual flash */
+        game->ship_invincibility_timer = 1.0F;
         game->ship_hit_flash_timer     = HIT_FLASH_DURATION;
 
         SDL_Log("COLLISION: ship hit! Lives remaining: %d", scoreGetLives());

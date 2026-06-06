@@ -5,10 +5,6 @@
 #include "utils.h"
 #include <stddef.h>
 
-/* =========================================================
- * Constants
- * ========================================================= */
-
 /* Collision sphere radius for each projectile */
 #define PROJECTILE_COLLISION_RADIUS 0.3F
 
@@ -27,8 +23,8 @@
 
 static AABB buildWorldAABB(Vec3 pos, Vec3 fwd, Vec3 up, Vec3 right, float lx_min, float lx_max, float ly_min, float ly_max, float lz_min, float lz_max){
     float lx[2], ly[2], lz[2];
-    AABB  box;
-    int   ix, iy, iz, first;
+    AABB box;
+    int ix, iy, iz, first;
 
     lx[0] = lx_min; lx[1] = lx_max;
     ly[0] = ly_min; ly[1] = ly_max;
