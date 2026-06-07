@@ -34,14 +34,6 @@ extern AABB aabbMerge(AABB a, AABB b);
  */
 extern int aabbVsAABB(AABB a, AABB b);
 
-/**
- * @brief Tests if a triangle (world-space vertices) intersects an AABB.
- * Uses the SAT (Separating Axis Theorem) with 13 candidate axes:
- * 3 AABB face normals, 1 triangle normal, 9 edge cross-products.
- *
- * @return 1 if they intersect, 0 if separated.
- */
-extern int triVsAABB(Vec3 v0, Vec3 v1, Vec3 v2, AABB box);
 
 /**
  * @brief Builds the BVH tree top-down using the provided points.
