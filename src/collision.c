@@ -63,37 +63,6 @@ static int sphereVsAABB(Vec3 center, float radius, AABB box) {
 }
 
 /* =========================================================
- * bvhSphereQuery
- * ========================================================= */
-static int bvhSphereQuery(const BVHNode* node, const Vec3* points, Vec3 center, float radius) {
-    int i;
-
-    if (node == NULL) {
-        return 0;
-    }
-    if (!sphereVsAABB(center, radius, node->aabb)) {
-        return 0;
-    }
-
-    if (bvhNodeIsLeaf(node)) {
-        for (i = 0; i < node->num_points; i++) {
-            if (vec3Distance(points[node->point_indices[i]], center) <= radius) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-
-    if (bvhSphereQuery(node->left, points, center, radius)) {
-        return 1;
-    }
-    if (bvhSphereQuery(node->right, points, center, radius)) {
-        return 1;
-    }
-    return 0;
-}
-
-/* =========================================================
  * bvhVsBvh  —  ship BVH vs asteroid BVH
  * Traverses both trees in parallel, pruning by AABB overlap.
  * ========================================================= */
@@ -149,11 +118,9 @@ static int bvhVsBvh(const BVHNode* a, const BVHNode* b) {
  * ========================================================= */
 extern int checkCollision(Vec3 ship_pos) {
     const Asteroid* asteroids = getAsteroids();
-    const int       count     = getAsteroidCount();
-    const BVHNode*  ship_bvh  = getShipBVH();
+    const int count = getAsteroidCount();
+    const BVHNode* ship_bvh  = getShipBVH();
     int i;
-
-    (void)ship_pos; /* position is already encoded in the ship BVH AABBs */
 
     if (!asteroids || count <= 0) {
         return 0;
@@ -166,6 +133,10 @@ extern int checkCollision(Vec3 ship_pos) {
         const Asteroid* ast = &asteroids[i];
 
         if (!ast->bvh) {
+            continue;
+        }
+        /* Broadphase: ship position vs asteroid position */
+        if (vec3Distance(ship_pos, ast->position) > 20.0F) {
             continue;
         }
         /* Broadphase: ship BVH root AABB vs asteroid root AABB */
@@ -250,15 +221,14 @@ extern int checkClawCollision(void) {
     for (i = 0; i < count; i++) {
         const Asteroid* ast = &asteroids[i];
 
-        if (!ast->bvh || !ast->barycenter_array) {
+        if (!ast->bvh) {
             continue;
         }
+        /* Claw sphere entered the asteroid root AABB — counts as a grab */
         if (!sphereVsAABB(claw_pos, CLAW_SPHERE_RADIUS, ast->bvh->aabb)) {
             continue;
         }
-        if (bvhSphereQuery(ast->bvh, ast->barycenter_array, claw_pos, CLAW_SPHERE_RADIUS)) {
-            return i;
-        }
+        return i;
     }
     return -1;
 }
