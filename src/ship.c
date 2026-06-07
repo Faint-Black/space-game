@@ -654,6 +654,91 @@ extern void renderScanner() {
     glEnable(GL_LIGHTING);
     glPopMatrix();
 }
+
+static void buildShipWorldTris(Vec3* out) {
+    const OBJModel* model = global_ship.model;
+    int m;
+    int f;
+    int idx = 0;
+
+    if (model == NULL) {
+        return;
+    }
+    for (m = 0; m < model->materialCount; m++) {
+        const MaterialGroup* group = &model->materials[m];
+        for (f = 0; f < group->faceCount; f++) {
+            out[idx * 3 + 0] = shipModelToWorld(group->faces[f].v[0].position);
+            out[idx * 3 + 1] = shipModelToWorld(group->faces[f].v[1].position);
+            out[idx * 3 + 2] = shipModelToWorld(group->faces[f].v[2].position);
+            idx++;
+        }
+    }
+}
+
+static void debugDrawShipBVHLeafTris(const BVHNode* node, const Vec3* tris, int tri_count, int* leaf_index) {
+    int i;
+
+    if (node == NULL) {
+        return;
+    }
+
+    if (bvhNodeIsLeaf(node)) {
+        int c = (*leaf_index) % 6;
+        float r = (c == 0 || c == 3 || c == 5) ? 1.0F : 0.25F;
+        float g = (c == 1 || c == 3 || c == 4) ? 1.0F : 0.25F;
+        float b = (c == 2 || c == 4 || c == 5) ? 1.0F : 0.25F;
+
+        (*leaf_index)++;
+        glColor3f(r, g, b);
+
+        for (i = 0; i < node->num_points; i++) {
+            int fi = node->point_indices[i];
+            if (fi < 0 || fi >= tri_count) {
+                continue;
+            }
+            {
+                const Vec3 a  = tris[fi * 3 + 0];
+                const Vec3 vb = tris[fi * 3 + 1];
+                const Vec3 vc = tris[fi * 3 + 2];
+
+                glVertex3f(a.x,  a.y,  a.z);   glVertex3f(vb.x, vb.y, vb.z);
+                glVertex3f(vb.x, vb.y, vb.z);  glVertex3f(vc.x, vc.y, vc.z);
+                glVertex3f(vc.x, vc.y, vc.z);  glVertex3f(a.x,  a.y,  a.z);
+            }
+        }
+        return;
+    }
+
+    debugDrawShipBVHLeafTris(node->left,  tris, tri_count, leaf_index);
+    debugDrawShipBVHLeafTris(node->right, tris, tri_count, leaf_index);
+}
+
+extern void debugRenderShipBVH(void) {
+    Vec3* tris;
+    int leaf_index = 0;
+
+    if (global_ship.bvh == NULL || global_ship.model == NULL || global_ship.barycenter_count <= 0) {
+        return;
+    }
+
+    tris = malloc((size_t)global_ship.barycenter_count * 3 * sizeof(Vec3));
+    if (tris == NULL) {
+        return;
+    }
+    buildShipWorldTris(tris);
+
+    glDisable(GL_LIGHTING);
+    glLineWidth(1.0F);
+
+    glBegin(GL_LINES);
+    debugDrawShipBVHLeafTris(global_ship.bvh, tris, global_ship.barycenter_count, &leaf_index);
+    glEnd();
+
+    glColor3f(1.0F, 1.0F, 1.0F);
+    glEnable(GL_LIGHTING);
+
+    free(tris);
+}
 /* ======================================================================== */
 /*  accessor                                                     */
 /* ======================================================================== */

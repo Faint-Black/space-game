@@ -188,6 +188,7 @@ extern void gameRenderFrame(const GameState* game) {
     if (DEBUG_MODE) {
         debugRenderAsteroidLeafBVHs();
         debugRenderAsteroidCollisions();
+        debugRenderShipBVH();
     }
 
     renderShip();

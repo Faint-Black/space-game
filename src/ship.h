@@ -111,6 +111,7 @@ extern void shipSetupCamera(int windowW, int windowH);
 extern void renderShip();
 extern void renderScanner();
 extern int  shipPointInScanner(Vec3 point);
+extern void debugRenderShipBVH(void);
 
 /**
  * @brief Returns a read-only pointer to the projectile array (MAX_PROJECTILES entries).
