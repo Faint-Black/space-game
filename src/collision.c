@@ -1,6 +1,7 @@
 #include "collision.h"
 #include "aabb_bvh.h"
 #include "asteroid.h"
+#include "module.h"
 #include "ship.h"
 #include "utils.h"
 #include <stddef.h>
@@ -229,6 +230,36 @@ extern int checkClawCollision(void) {
             continue;
         }
         return i;
+    }
+    return -1;
+}
+
+/* =========================================================
+ * checkModuleGrab
+ * ========================================================= */
+extern int checkModuleGrab(void) {
+    const Module* modules = getModules();
+    const int     count   = getModuleCount();
+    Vec3 claw_pos;
+    int i;
+
+    if (!getShipArmExtended()) {
+        return -1;
+    }
+    if (!modules || count <= 0) {
+        return -1;
+    }
+
+    claw_pos = computeClawWorldPos();
+
+    for (i = 0; i < count; i++) {
+        if (!modules[i].active) {
+            continue;
+        }
+        /* Claw close enough to the module point — counts as a rescue */
+        if (vec3Distance(claw_pos, modules[i].position) <= CLAW_SPHERE_RADIUS) {
+            return i;
+        }
     }
     return -1;
 }

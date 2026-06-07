@@ -1,6 +1,7 @@
 #include "render.h"
 #include "aabb_bvh.h"
 #include "asteroid.h"
+#include "module.h"
 #include "ship.h"
 #include "stars.h"
 #include "utils.h"
@@ -88,6 +89,37 @@ extern void renderAsteroids(void) {
     }
 
     renderExplosionParticles();
+}
+
+extern void renderModules(void) {
+    const Module* modules = getModules();
+    const int     count   = getModuleCount();
+    const float   r       = 2.0F;
+    int i;
+
+    glDisable(GL_LIGHTING);
+    glColor3f(0.2F, 1.0F, 0.8F);
+
+    for (i = 0; i < count; i++) {
+        Vec3 p;
+        if (!modules[i].active) {
+            continue;
+        }
+        p = modules[i].position;
+
+        glBegin(GL_LINES);
+        /* horizontal diamond */
+        glVertex3f(p.x - r, p.y, p.z); glVertex3f(p.x, p.y, p.z - r);
+        glVertex3f(p.x, p.y, p.z - r); glVertex3f(p.x + r, p.y, p.z);
+        glVertex3f(p.x + r, p.y, p.z); glVertex3f(p.x, p.y, p.z + r);
+        glVertex3f(p.x, p.y, p.z + r); glVertex3f(p.x - r, p.y, p.z);
+        /* vertical spikes */
+        glVertex3f(p.x, p.y - r, p.z); glVertex3f(p.x, p.y + r, p.z);
+        glEnd();
+    }
+
+    glColor3f(1.0F, 1.0F, 1.0F);
+    glEnable(GL_LIGHTING);
 }
 
 extern void debugRenderPoints(Vec3* points, int count) {

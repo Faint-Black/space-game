@@ -2,6 +2,7 @@
 #include "asteroid.h"
 #include "collision.h"
 #include "hud.h"
+#include "module.h"
 #include "render.h"
 #include "score.h"
 #include "ship.h"
@@ -46,6 +47,7 @@ extern GameState* gameInit(void) {
     initStars();
     initShip();
     initAsteroids(ASTEROID_COUNT);
+    initModules();
     scoreInit();
 
     game->running                  = true;
@@ -79,6 +81,7 @@ extern void gameRestart(GameState* game) {
 
     initShip();
     initAsteroids(ASTEROID_COUNT);
+    initModules();
     scoreInit();
 
     game->paused                   = false;
@@ -184,6 +187,7 @@ extern void gameRenderFrame(const GameState* game) {
     setupLighting();
     renderStars();
     renderAsteroids();
+    renderModules();
 
     if (DEBUG_MODE) {
         debugRenderAsteroidLeafBVHs();
@@ -344,11 +348,22 @@ static void handleProjectileCollisions(void) {
 
 static void handleClawCollision(GameState* game, float dt) {
     int ast_idx;
+    int mod_idx;
 
     if (game->claw_grab_cooldown > 0.0F) {
         game->claw_grab_cooldown -= dt;
         if (game->claw_grab_cooldown < 0.0F)
             game->claw_grab_cooldown = 0.0F;
+        return;
+    }
+
+    /* Claw rescues a module: collect it and award module points */
+    mod_idx = checkModuleGrab();
+    if (mod_idx >= 0) {
+        collectModule(mod_idx);
+        scoreAddModuleCollected();
+        game->claw_grab_cooldown = CLAW_GRAB_COOLDOWN;
+        SDL_Log("CLAW: rescued module %d, score: %d", mod_idx, scoreGetPoints());
         return;
     }
 

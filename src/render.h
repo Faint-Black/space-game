@@ -72,4 +72,9 @@ extern void debugRenderAsteroidCollisions(void);
  */
 extern void renderExplosionParticles(void);
 
+/**
+ * @brief Renders all active rescue modules as cyan wireframe diamonds.
+ */
+extern void renderModules(void);
+
 #endif /* RENDER_H */

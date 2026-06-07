@@ -19,5 +19,11 @@ extern int checkProjectileCollision(int* hit_asteroid_idx, int* hit_projectile_i
  */
 extern int checkClawCollision(void);
 
+/**
+ * @brief Checks if the mechanical claw reached any active rescue module.
+ * Only active while the arm is extended. Returns the module index, or -1.
+ */
+extern int checkModuleGrab(void);
+
 
 #endif /* COLLISION_H */
