@@ -210,21 +210,20 @@ extern int checkProjectileCollision(int* hit_asteroid_idx, int* hit_projectile_i
         for (j = 0; j < ast_count; j++) {
             const Asteroid* ast = &asteroids[j];
 
-            if (!ast->bvh || !ast->barycenter_array) {
+            if (!ast->bvh) {
                 continue;
             }
             if (!sphereVsAABB(pos, PROJECTILE_COLLISION_RADIUS, ast->bvh->aabb)) {
                 continue;
             }
-            if (bvhSphereQuery(ast->bvh, ast->barycenter_array, pos, PROJECTILE_COLLISION_RADIUS)) {
-                if (hit_asteroid_idx) {
-                    *hit_asteroid_idx = j;
-                }
-                if (hit_projectile_idx) {
-                    *hit_projectile_idx = i;
-                }
-                return 1;
+            /* Projectile entered the asteroid root AABB — counts as a hit */
+            if (hit_asteroid_idx) {
+                *hit_asteroid_idx = j;
             }
+            if (hit_projectile_idx) {
+                *hit_projectile_idx = i;
+            }
+            return 1;
         }
     }
     return 0;
