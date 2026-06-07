@@ -168,98 +168,60 @@ extern void debugRenderAsteroidBVHs(void) {
     }
 }
 
-static void debugRenderLeafBVH(BVHNode* node) {
-    const Vec3 red = vec3(1, 0, 0);
-    if (node == NULL) return;
-
-    if (bvhNodeIsLeaf(node)) {
-        debugRenderAABB(node->aabb, red);
-    }
-    if (node->left != NULL) debugRenderLeafBVH(node->left);
-    if (node->right != NULL) debugRenderLeafBVH(node->right);
-}
-
-extern void debugRenderAsteroidLeafBVHs(void) {
-    int i;
-    for (i = 0; i < getAsteroidCount(); i++) {
-        const Asteroid asteroid = getAsteroids()[i];
-        debugRenderLeafBVH(asteroid.bvh);
-    }
-}
-
-
-static AABB debugBuildShipAABB(Vec3 pos, Vec3 fwd, Vec3 up, Vec3 right) {
-    static const float lx[2] = { -2.3F,  2.3F };
-    static const float ly[2] = { -1.2F,  1.5F };
-    static const float lz[2] = { -2.0F,  3.5F };
-    AABB box;
-    int ix, iy, iz, first = 1;
-
-    for (ix = 0; ix < 2; ix++) {
-        for (iy = 0; iy < 2; iy++) {
-            for (iz = 0; iz < 2; iz++) {
-                Vec3 c;
-                c.x = pos.x + right.x*lx[ix] + up.x*ly[iy] + fwd.x*lz[iz];
-                c.y = pos.y + right.y*lx[ix] + up.y*ly[iy] + fwd.y*lz[iz];
-                c.z = pos.z + right.z*lx[ix] + up.z*ly[iy] + fwd.z*lz[iz];
-
-                if (first) {
-                    box.min = c;
-                    box.max = c;
-                    first = 0;
-                } else {
-                    if (c.x < box.min.x) box.min.x = c.x;
-                    if (c.y < box.min.y) box.min.y = c.y;
-                    if (c.z < box.min.z) box.min.z = c.z;
-                    if (c.x > box.max.x) box.max.x = c.x;
-                    if (c.y > box.max.y) box.max.y = c.y;
-                    if (c.z > box.max.z) box.max.z = c.z;
-                }
-            }
-        }
-    }
-    return box;
-}
-
-static void debugRenderLeafBVHCollision(const BVHNode* node, AABB ship_box) {
-    const Vec3 yellow = { 1.0F, 1.0F, 0.0F };
-    const Vec3 red    = { 1.0F, 0.0F, 0.0F };
+static void debugRenderLeafBVH(BVHNode* node, const BVHNode* ship_bvh) {
+    const Vec3 red    = vec3(1, 0, 0);
+    const Vec3 yellow = vec3(1, 1, 0);
 
     if (node == NULL) {
         return;
     }
     if (bvhNodeIsLeaf(node)) {
-        if (aabbVsAABB(ship_box, node->aabb)) {
+        if (ship_bvh && aabbVsAABB(ship_bvh->aabb, node->aabb)) {
             debugRenderAABB(node->aabb, yellow);
         } else {
             debugRenderAABB(node->aabb, red);
         }
-        return;
     }
-    debugRenderLeafBVHCollision(node->left,  ship_box);
-    debugRenderLeafBVHCollision(node->right, ship_box);
+    if (node->left != NULL) {
+        debugRenderLeafBVH(node->left, ship_bvh);
+    }
+    if (node->right != NULL) {
+        debugRenderLeafBVH(node->right, ship_bvh);
+    }
 }
 
-extern void debugRenderAsteroidCollisions(void) {
-    Vec3 pos = getShipPosition();
-    Vec3 fwd  = getShipForward();
-    Vec3 up   = getShipUp();
-    Vec3 right = getShipRight();
-    AABB ship_box;
+extern void debugRenderAsteroidLeafBVHs(void) {
+    const BVHNode* ship_bvh = getShipBVH();
     int i;
+    for (i = 0; i < getAsteroidCount(); i++) {
+        const Asteroid asteroid = getAsteroids()[i];
+        debugRenderLeafBVH(asteroid.bvh, ship_bvh);
+    }
+}
 
-    ship_box = debugBuildShipAABB(pos, fwd, up, right);
+
+extern void debugRenderAsteroidCollisions(void) {
+    const BVHNode* ship_bvh = getShipBVH();
+    int i;
 
     glDisable(GL_LIGHTING);
     glLineWidth(1.5F);
 
-    /* Draw ship body AABB in green */
-    debugRenderAABB(ship_box, vec3(0.0F, 1.0F, 0.0F));
-
-    /* Draw each asteroid's leaf BVH nodes coloured by collision state */
+    /* Draw asteroid leaf BVH nodes: yellow if overlapping ship BVH root, red otherwise */
     for (i = 0; i < getAsteroidCount(); i++) {
-        const Asteroid asteroid = getAsteroids()[i];
-        debugRenderLeafBVHCollision(asteroid.bvh, ship_box);
+        const Asteroid* ast = &getAsteroids()[i];
+        const Vec3 yellow = { 1.0F, 1.0F, 0.0F };
+        const Vec3 red    = { 1.0F, 0.0F, 0.0F };
+
+        if (!ast->bvh) {
+            continue;
+        }
+
+        if (ship_bvh && aabbVsAABB(ship_bvh->aabb, ast->bvh->aabb)) {
+            debugRenderAABB(ast->bvh->aabb, yellow);
+        } else {
+            debugRenderAABB(ast->bvh->aabb, red);
+        }
     }
 
     glLineWidth(1.0F);
