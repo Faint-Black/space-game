@@ -93,10 +93,10 @@ extern void renderAsteroids(void) {
 
 extern void renderModules(void) {
     const Module* modules  = getModules();
-    const int     count    = getModuleCount();
-    const float   size     = 2.0F;
-    const float   ring_r   = 3.5F;
-    const int     ring_seg = 32;
+    const int count = getModuleCount();
+    const float size = 2.0F;
+    const float ring_r = 3.5F;
+    const int ring_seg = 32;
     float pulse, angle;
     int i, s;
 
@@ -131,16 +131,16 @@ extern void renderModules(void) {
         glColor3f(r, g, b);
         glBegin(GL_TRIANGLES);
         /* Top 4 faces */
-        glVertex3f( 0,    size,  0);  glVertex3f( size, 0,  0);    glVertex3f( 0,    0,  size);
-        glVertex3f( 0,    size,  0);  glVertex3f( 0,    0,  size);  glVertex3f(-size, 0,  0);
-        glVertex3f( 0,    size,  0);  glVertex3f(-size, 0,  0);    glVertex3f( 0,    0, -size);
-        glVertex3f( 0,    size,  0);  glVertex3f( 0,    0, -size);  glVertex3f( size, 0,  0);
+        glVertex3f( 0, size,  0);  glVertex3f( size, 0,  0);    glVertex3f( 0, 0, size);
+        glVertex3f( 0, size,  0);  glVertex3f( 0, 0, size);  glVertex3f(-size, 0, 0);
+        glVertex3f( 0, size,  0);  glVertex3f(-size, 0,  0);    glVertex3f( 0, 0, -size);
+        glVertex3f( 0, size,  0);  glVertex3f( 0, 0, -size);  glVertex3f( size, 0, 0);
         /* Bottom 4 faces — slightly dimmer */
         glColor3f(r * 0.6F, g * 0.6F, b * 0.6F);
-        glVertex3f( 0,   -size,  0);  glVertex3f( 0,    0,  size);  glVertex3f( size, 0,  0);
-        glVertex3f( 0,   -size,  0);  glVertex3f(-size, 0,  0);    glVertex3f( 0,    0,  size);
-        glVertex3f( 0,   -size,  0);  glVertex3f( 0,    0, -size);  glVertex3f(-size, 0,  0);
-        glVertex3f( 0,   -size,  0);  glVertex3f( size, 0,  0);    glVertex3f( 0,    0, -size);
+        glVertex3f( 0, -size,  0);  glVertex3f( 0, 0,  size);  glVertex3f( size, 0,  0);
+        glVertex3f( 0, -size,  0);  glVertex3f(-size, 0, 0);    glVertex3f( 0, 0,  size);
+        glVertex3f( 0, -size,  0);  glVertex3f( 0, 0, -size);  glVertex3f(-size, 0, 0);
+        glVertex3f( 0, -size,  0);  glVertex3f( size, 0, 0);    glVertex3f( 0, 0, -size);
         glEnd();
 
         /* Ring around the equator */

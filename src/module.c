@@ -2,10 +2,10 @@
 #include "utils.h"
 #include <math.h>
 
-#define NUM_MODULES       20
+#define NUM_MODULES 20
 #define MODULE_SPAWN_RADIUS 150.0F
-#define MODULE_ROTATION_SPEED 60.0F  /* degrees per second */
-#define MODULE_PULSE_SPEED    3.0F   /* radians per second */
+#define MODULE_ROTATION_SPEED 60.0F 
+#define MODULE_PULSE_SPEED 3.0F   
 
 static Module modules[NUM_MODULES];
 
@@ -13,10 +13,10 @@ extern void initModules(void) {
     int i;
     for (i = 0; i < NUM_MODULES; i++) {
         const float dist = randRangedFloat(40.0F, MODULE_SPAWN_RADIUS);
-        modules[i].position      = vec3MulScalar(vec3Random(), dist);
+        modules[i].position  = vec3MulScalar(vec3Random(), dist);
         modules[i].rotationAngle = randRangedFloat(0.0F, 360.0F);
-        modules[i].pulsePhase    = randRangedFloat(0.0F, 6.28318F);
-        modules[i].active        = 1;
+        modules[i].pulsePhase  = randRangedFloat(0.0F, 6.28318F);
+        modules[i].active = 1;
     }
 }
 
