@@ -4,8 +4,10 @@
 #include "utils.h"
 
 typedef struct Module {
-    Vec3 position;
-    int  active;
+    Vec3  position;
+    float rotationAngle; /* current rotation angle in degrees */
+    float pulsePhase;    /* current phase for brightness pulse */
+    int   active;
 } Module;
 
 /**
@@ -13,6 +15,11 @@ typedef struct Module {
  *        startup and again on every restart.
  */
 extern void initModules(void);
+
+/**
+ * @brief Updates module rotation and pulse animations.
+ */
+extern void updateModules(float dt);
 
 /**
  * @brief Fetches the constant reference to the module array.

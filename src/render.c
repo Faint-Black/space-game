@@ -92,33 +92,71 @@ extern void renderAsteroids(void) {
 }
 
 extern void renderModules(void) {
-    const Module* modules = getModules();
-    const int     count   = getModuleCount();
-    const float   r       = 2.0F;
-    int i;
+    const Module* modules  = getModules();
+    const int     count    = getModuleCount();
+    const float   size     = 2.0F;
+    const float   ring_r   = 3.5F;
+    const int     ring_seg = 32;
+    float pulse, angle;
+    int i, s;
 
+    /* Pulse: oscillates between 0 and 1 using elapsed time */
+    pulse = 0.5F + 0.5F * (float)sin((double)SDL_GetTicks() * 0.003);
+
+    glDisable(GL_CULL_FACE);
     glDisable(GL_LIGHTING);
-    glColor3f(0.2F, 1.0F, 0.8F);
 
     for (i = 0; i < count; i++) {
         Vec3 p;
+        float r, g, b;
+
         if (!modules[i].active) {
             continue;
         }
         p = modules[i].position;
 
-        glBegin(GL_LINES);
-        /* horizontal diamond */
-        glVertex3f(p.x - r, p.y, p.z); glVertex3f(p.x, p.y, p.z - r);
-        glVertex3f(p.x, p.y, p.z - r); glVertex3f(p.x + r, p.y, p.z);
-        glVertex3f(p.x + r, p.y, p.z); glVertex3f(p.x, p.y, p.z + r);
-        glVertex3f(p.x, p.y, p.z + r); glVertex3f(p.x - r, p.y, p.z);
-        /* vertical spikes */
-        glVertex3f(p.x, p.y - r, p.z); glVertex3f(p.x, p.y + r, p.z);
+        glPushMatrix();
+        glTranslatef(p.x, p.y, p.z);
+
+        /* Slow rotation around Y */
+        angle = (float)(SDL_GetTicks() % 360000) * 0.06F;
+        glRotatef(angle, 0.0F, 1.0F, 0.0F);
+
+        /* Pulsing gold color */
+        r = 0.8F + 0.2F * pulse;
+        g = 0.6F + 0.2F * pulse;
+        b = 0.0F + 0.1F * pulse;
+
+        /* Octahedron — 8 triangular faces */
+        glColor3f(r, g, b);
+        glBegin(GL_TRIANGLES);
+        /* Top 4 faces */
+        glVertex3f( 0,    size,  0);  glVertex3f( size, 0,  0);    glVertex3f( 0,    0,  size);
+        glVertex3f( 0,    size,  0);  glVertex3f( 0,    0,  size);  glVertex3f(-size, 0,  0);
+        glVertex3f( 0,    size,  0);  glVertex3f(-size, 0,  0);    glVertex3f( 0,    0, -size);
+        glVertex3f( 0,    size,  0);  glVertex3f( 0,    0, -size);  glVertex3f( size, 0,  0);
+        /* Bottom 4 faces — slightly dimmer */
+        glColor3f(r * 0.6F, g * 0.6F, b * 0.6F);
+        glVertex3f( 0,   -size,  0);  glVertex3f( 0,    0,  size);  glVertex3f( size, 0,  0);
+        glVertex3f( 0,   -size,  0);  glVertex3f(-size, 0,  0);    glVertex3f( 0,    0,  size);
+        glVertex3f( 0,   -size,  0);  glVertex3f( 0,    0, -size);  glVertex3f(-size, 0,  0);
+        glVertex3f( 0,   -size,  0);  glVertex3f( size, 0,  0);    glVertex3f( 0,    0, -size);
         glEnd();
+
+        /* Ring around the equator */
+        glColor3f(r, g, b);
+        glBegin(GL_LINE_LOOP);
+        for (s = 0; s < ring_seg; s++) {
+            float a = (float)s / (float)ring_seg * 6.28318F;
+            glVertex3f(ring_r * (float)cos(a), 0.0F, ring_r * (float)sin(a));
+        }
+        glEnd();
+
+        glPopMatrix();
     }
 
     glColor3f(1.0F, 1.0F, 1.0F);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
 }
 

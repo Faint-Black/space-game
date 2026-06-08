@@ -152,6 +152,7 @@ extern void gameUpdateLogic(GameState* game) {
 
     updateShip(dt);
     updateAsteroids(dt);
+    updateModules(dt);
 
     /* Ship vs asteroid collision (with invincibility cooldown) */
     handleShipCollision(game, dt);
