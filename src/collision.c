@@ -202,39 +202,6 @@ extern int checkProjectileCollision(int* hit_asteroid_idx, int* hit_projectile_i
 }
 
 /* =========================================================
- * checkClawCollision
- * ========================================================= */
-extern int checkClawCollision(void) {
-    const Asteroid* asteroids = getAsteroids();
-    const int       count     = getAsteroidCount();
-    Vec3 claw_pos;
-    int i;
-
-    if (!getShipArmExtended()) {
-        return -1;
-    }
-    if (!asteroids || count <= 0) {
-        return -1;
-    }
-
-    claw_pos = computeClawWorldPos();
-
-    for (i = 0; i < count; i++) {
-        const Asteroid* ast = &asteroids[i];
-
-        if (!ast->bvh) {
-            continue;
-        }
-        /* Claw sphere entered the asteroid root AABB — counts as a grab */
-        if (!sphereVsAABB(claw_pos, CLAW_SPHERE_RADIUS, ast->bvh->aabb)) {
-            continue;
-        }
-        return i;
-    }
-    return -1;
-}
-
-/* =========================================================
  * checkModuleGrab
  * ========================================================= */
 extern int checkModuleGrab(void) {

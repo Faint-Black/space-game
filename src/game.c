@@ -348,31 +348,23 @@ static void handleProjectileCollisions(void) {
 }
 
 static void handleClawCollision(GameState* game, float dt) {
-    int ast_idx;
     int mod_idx;
 
     if (game->claw_grab_cooldown > 0.0F) {
         game->claw_grab_cooldown -= dt;
-        if (game->claw_grab_cooldown < 0.0F)
+        if (game->claw_grab_cooldown < 0.0F) {
             game->claw_grab_cooldown = 0.0F;
+        }
         return;
     }
 
-    /* Claw rescues a module: collect it and award module points */
+    /* Claw rescues a module: collect it and award points */
     mod_idx = checkModuleGrab();
     if (mod_idx >= 0) {
         collectModule(mod_idx);
         scoreAddModuleCollected();
         game->claw_grab_cooldown = CLAW_GRAB_COOLDOWN;
         SDL_Log("CLAW: rescued module %d, score: %d", mod_idx, scoreGetPoints());
-        return;
-    }
-
-    ast_idx = checkClawCollision();
-    if (ast_idx >= 0) {
-        scoreAddAsteroidDestroyed();
-        game->claw_grab_cooldown = CLAW_GRAB_COOLDOWN;
-        SDL_Log("CLAW: grabbed asteroid %d, score: %d", ast_idx, scoreGetPoints());
     }
 }
 

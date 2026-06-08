@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <math.h>
 
-#define NUM_MODULES 20
+#define NUM_MODULES 45
 #define MODULE_SPAWN_RADIUS 150.0F
 #define MODULE_ROTATION_SPEED 60.0F 
 #define MODULE_PULSE_SPEED 3.0F   
